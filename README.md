@@ -2,7 +2,13 @@
 
 Bài lab Labtainer phân tích giấu tin trong video H.265/HEVC.
 
-## Cài đặt
+## Cài đặt bằng imodule
+
+```bash
+imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-stego.tar.gz
+```
+
+## Cài đặt bằng curl
 
 ```bash
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/

@@ -14,12 +14,20 @@ Ví dụ repo:
 https://github.com/<ten-tai-khoan>/<ten-repo>
 ```
 
-## Cách sinh viên tải bài lab
+## Cách sinh viên tải bài lab bằng imodule
+
+Sinh viên có thể tải trực tiếp giống các bài DSEC khác:
+
+```bash
+imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-stego.tar.gz
+```
+
+## Cách sinh viên tải bài lab bằng curl
 
 Nếu file được đặt ở nhánh `main`, sinh viên tải bằng lệnh:
 
 ```bash
-curl -L https://raw.githubusercontent.com/<ten-tai-khoan>/<ten-repo>/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
+curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
 ```
 
 Sau đó khởi động bài lab:
