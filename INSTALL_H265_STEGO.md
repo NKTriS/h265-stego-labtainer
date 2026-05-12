@@ -1,5 +1,13 @@
 # Cài đặt bài lab h265-stego từ GitHub
 
+Docker image đã có trên DockerHub:
+
+```text
+nktris/h265-stego.h265-stego.student:latest
+```
+
+Vì vậy sinh viên chỉ cần tải gói lab rồi chạy `labtainer h265-stego`. Labtainer sẽ tự pull image nếu máy chưa có image.
+
 ## 1. Tải bài lab
 
 Cách khuyến nghị:
@@ -31,41 +39,7 @@ instr_config/
 HUONG_DAN_SINH_VIEN.md
 ```
 
-## 2. Build Docker image lần đầu
-
-Trên máy mới, nếu chạy ngay:
-
-```bash
-labtainer h265-stego
-```
-
-mà gặp lỗi:
-
-```text
-Unable to reach DockerHub
-Could not find image info for h265-stego
-```
-
-thì nguyên nhân là máy chưa có Docker image của lab. Hãy build image trước:
-
-```bash
-cd ~/labtainer/labtainer-student
-./bin/rebuild -L -b h265-stego
-```
-
-Sau khi build xong, kiểm tra image:
-
-```bash
-docker images | grep h265-stego
-```
-
-Cần thấy image dạng:
-
-```text
-h265-stego.h265-stego.student
-```
-
-## 3. Chạy lab
+## 2. Chạy lab
 
 ```bash
 cd ~/labtainer/labtainer-student
@@ -76,6 +50,22 @@ Nếu muốn làm lại từ đầu:
 
 ```bash
 labtainer -r h265-stego
+```
+
+## 3. Nếu máy không vào được DockerHub
+
+Nếu gặp lỗi:
+
+```text
+Unable to reach DockerHub
+Could not find image info for h265-stego
+```
+
+thì build image local:
+
+```bash
+cd ~/labtainer/labtainer-student
+./bin/rebuild -L -b h265-stego
 ```
 
 ## 4. Kiểm tra kết quả
