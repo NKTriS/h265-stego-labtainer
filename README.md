@@ -1,45 +1,47 @@
-# h265-stego Labtainer Lab
+# H.265 Steganography Labtainer Labs
 
-Bài lab Labtainer phân tích giấu tin trong video H.265/HEVC.
+Repo này chứa các bài lab Labtainer về giấu tin trong video H.265/HEVC.
 
-Docker image của lab đã được đẩy lên DockerHub:
+## Lab 1: h265-stego
 
-```text
-nktris/h265-stego.workstation.student:latest
-```
-
-Vì vậy trên máy có Internet/DockerHub, sinh viên chỉ cần tải gói lab rồi chạy, không cần build image thủ công.
-
-## Cài đặt bằng imodule
+Phân tích giấu tin trong SEI và VCL slice.
 
 ```bash
 imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-stego.tar.gz
 ```
 
-## Cài đặt bằng curl
-
-```bash
-curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
-```
-
-## Chạy lab
+Chạy:
 
 ```bash
 cd ~/labtainer/labtainer-student
 labtainer h265-stego
 ```
 
-Nếu máy không truy cập được DockerHub, hãy build local:
+## Lab 2: h265-cctv-motion-leak
+
+Điều tra rò rỉ CCTV H.265 qua kênh motion-vector LSB. Lab có 2 container: `analyst` và `evidence-server`.
+
+```bash
+imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-cctv-motion-leak.tar.gz
+```
+
+Nếu không có `imodule`, tải bằng `curl`:
+
+```bash
+curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-cctv-motion-leak.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
+```
+
+Chạy:
 
 ```bash
 cd ~/labtainer/labtainer-student
-./bin/rebuild -L -b h265-stego
+labtainer h265-cctv-motion-leak
 ```
 
-## Kiểm tra tiến độ
+Kiểm tra:
 
 ```bash
-checkwork h265-stego
+checkwork h265-cctv-motion-leak
 ```
 
-Bài lab không yêu cầu nhập checkword thủ công. Sinh viên làm theo hướng dẫn trong `HUONG_DAN_SINH_VIEN.md` được đóng gói bên trong file `h265-stego.tar.gz`.
+Các lab không yêu cầu nhập checkword thủ công; Labtainer tự chấm qua `checkwork`.
