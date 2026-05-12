@@ -1,36 +1,71 @@
 # Cài đặt bài lab h265-stego từ GitHub
 
-## Cấu trúc repo đề xuất
+## 1. Tải bài lab
 
-Đưa file sau lên GitHub:
-
-```text
-h265-stego.tar.gz
-```
-
-Ví dụ repo:
-
-```text
-https://github.com/<ten-tai-khoan>/<ten-repo>
-```
-
-## Cách sinh viên tải bài lab bằng imodule
-
-Sinh viên có thể tải trực tiếp giống các bài DSEC khác:
+Cách khuyến nghị:
 
 ```bash
 imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-stego.tar.gz
 ```
 
-## Cách sinh viên tải bài lab bằng curl
-
-Nếu file được đặt ở nhánh `main`, sinh viên tải bằng lệnh:
+Nếu không có `imodule`, dùng `curl`:
 
 ```bash
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
 ```
 
-Sau đó khởi động bài lab:
+Kiểm tra sau khi tải:
+
+```bash
+ls ~/labtainer/trunk/labs/h265-stego
+```
+
+Cần thấy:
+
+```text
+config/
+dockerfiles/
+docs/
+h265-stego/
+instr_config/
+HUONG_DAN_SINH_VIEN.md
+```
+
+## 2. Build Docker image lần đầu
+
+Trên máy mới, nếu chạy ngay:
+
+```bash
+labtainer h265-stego
+```
+
+mà gặp lỗi:
+
+```text
+Unable to reach DockerHub
+Could not find image info for h265-stego
+```
+
+thì nguyên nhân là máy chưa có Docker image của lab. Hãy build image trước:
+
+```bash
+cd ~/labtainer/labtainer-student
+./bin/rebuild -L -b h265-stego
+```
+
+Sau khi build xong, kiểm tra image:
+
+```bash
+docker images | grep h265-stego
+```
+
+Cần thấy image dạng:
+
+```text
+h265-stego.h265-stego.student
+```
+
+## 3. Chạy lab
 
 ```bash
 cd ~/labtainer/labtainer-student
@@ -43,34 +78,7 @@ Nếu muốn làm lại từ đầu:
 labtainer -r h265-stego
 ```
 
-## Cách kiểm tra gói sau khi tải
-
-Sau khi giải nén, kiểm tra thư mục:
-
-```bash
-ls ~/labtainer/trunk/labs/h265-stego
-```
-
-Cần thấy các thư mục/file chính:
-
-```text
-config/
-dockerfiles/
-docs/
-h265-stego/
-instr_config/
-HUONG_DAN_SINH_VIEN.md
-```
-
-## Cách kiểm tra bài lab
-
-Khởi động:
-
-```bash
-labtainer h265-stego
-```
-
-Trong quá trình làm bài, kiểm tra tiến độ:
+## 4. Kiểm tra kết quả
 
 ```bash
 checkwork h265-stego

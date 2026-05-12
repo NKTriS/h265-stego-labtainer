@@ -14,6 +14,17 @@ imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
 ```
 
+## Build image lần đầu
+
+Trên máy mới, sau khi tải lab phải build Docker image một lần:
+
+```bash
+cd ~/labtainer/labtainer-student
+./bin/rebuild -L -b h265-stego
+```
+
+Nếu máy có Internet/DockerHub thì có thể bỏ `-L`, nhưng với máy trong lớp thường nên dùng `-L` để build từ base image có sẵn trên Labtainer.
+
 ## Chạy lab
 
 ```bash
