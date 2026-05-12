@@ -3,7 +3,7 @@
 Docker image đã có trên DockerHub:
 
 ```text
-nktris/h265-stego.h265-stego.student:latest
+nktris/h265-stego.workstation.student:latest
 ```
 
 Vì vậy sinh viên chỉ cần tải gói lab rồi chạy `labtainer h265-stego`. Labtainer sẽ tự pull image nếu máy chưa có image.

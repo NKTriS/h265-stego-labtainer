@@ -5,7 +5,7 @@ Bài lab Labtainer phân tích giấu tin trong video H.265/HEVC.
 Docker image của lab đã được đẩy lên DockerHub:
 
 ```text
-nktris/h265-stego.h265-stego.student:latest
+nktris/h265-stego.workstation.student:latest
 ```
 
 Vì vậy trên máy có Internet/DockerHub, sinh viên chỉ cần tải gói lab rồi chạy, không cần build image thủ công.
