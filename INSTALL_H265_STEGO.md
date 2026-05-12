@@ -34,7 +34,7 @@ Cần thấy:
 config/
 dockerfiles/
 docs/
-h265-stego/
+workstation/
 instr_config/
 HUONG_DAN_SINH_VIEN.md
 ```
