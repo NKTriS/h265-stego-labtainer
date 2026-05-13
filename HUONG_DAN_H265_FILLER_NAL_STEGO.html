@@ -340,6 +340,11 @@
       → <code>labtainer h265-filler-nal-stego</code>
     </div>
 
+    <div class="box box-info">
+      <strong>Cách hiểu luồng bài:</strong><br />
+      Lab này cho sinh viên so sánh một video sạch và một video nghi vấn. Video vẫn xem được bình thường, nhưng bản nghi vấn có thêm các Filler Data NAL. Kỹ thuật giấu tin không sửa pixel, không dùng SEI, không dùng motion vector; thông điệp được mã hóa bằng độ dài/chẵn lẻ của dữ liệu filler.
+    </div>
+
     <div class="task-block">
       <div class="task-header">Chuẩn bị</div>
       <div class="task-body">
@@ -357,10 +362,12 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 1 — So sánh hai file chứng cứ</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xác nhận hai file có nội dung nhị phân khác nhau dù cùng là video HEVC. Đây là dấu hiệu ban đầu cho thấy bản nghi vấn đã bị chỉnh sửa.</p>
         <p>Trong terminal <code>workstation</code>, xem các file chứng cứ và tính hash:</p>
         <pre><span class="cmd">ls evidence</span>
 <span class="cmd">sha256sum evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; sha256sum.stdout</span>
 <span class="cmd">cat sha256sum.stdout</span></pre>
+        <p>Nếu hai mã SHA-256 khác nhau, sinh viên cần tiếp tục phân tích để xem khác nhau ở phần dữ liệu video hay ở phần cấu trúc phụ của bitstream.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>sha256sum.stdout</code> có tên <code>warehouse-suspect.hevc</code>.
         </div>
@@ -370,11 +377,13 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 2 — Xác nhận video H.265</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> chứng minh file nghi vấn vẫn là video H.265 hợp lệ, không phải file dữ liệu giả được đổi đuôi.</p>
         <p>Kiểm tra file nghi vấn bằng <code>ffprobe</code>:</p>
         <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/warehouse-suspect.hevc &gt; ffprobe.stdout</span>
 <span class="cmd">cat ffprobe.stdout</span></pre>
         <p>Nếu muốn xem video:</p>
         <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-suspect.hevc</span></pre>
+        <p>Việc video vẫn mở được giúp sinh viên hiểu đặc điểm của steganography: dữ liệu ẩn có thể tồn tại trong file mà người xem bình thường không nhận ra.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>ffprobe.stdout</code> có <code>codec_name=hevc</code>.
         </div>
@@ -384,9 +393,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 3 — So sánh số lượng NAL</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> tìm điểm khác biệt ở cấp NAL unit giữa video sạch và video nghi vấn.</p>
         <p>Chạy tool so sánh NAL giữa bản sạch và bản nghi vấn:</p>
         <pre><span class="cmd">python3 tools/nal_compare.py evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; nal_compare.py.stdout</span>
 <span class="cmd">cat nal_compare.py.stdout</span></pre>
+        <p>Nếu bản nghi vấn có nhiều Filler NAL bất thường, đây là hướng điều tra chính. Filler NAL thường không ảnh hưởng nội dung hình ảnh nên dễ bị lợi dụng làm kênh giấu tin.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>SUSPECT_FILLER=248</code>.
         </div>
@@ -396,9 +407,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 4 — Dump Filler NAL</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xem từng Filler NAL có bao nhiêu byte <code>0xff</code> để chuẩn bị khôi phục bit ẩn.</p>
         <p>Dump các Filler NAL trong file nghi vấn:</p>
         <pre><span class="cmd">python3 tools/filler_dump.py evidence/warehouse-suspect.hevc &gt; filler_dump.py.stdout</span>
 <span class="cmd">cat filler_dump.py.stdout</span></pre>
+        <p>Quan sát cột số lượng byte filler. Quy luật của bài là số byte <code>0xff</code> chẵn biểu diễn bit 0, số byte <code>0xff</code> lẻ biểu diễn bit 1.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>FILLER_RECORDS=248</code>.
         </div>
@@ -408,6 +421,7 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 5 — Sửa extractor</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> chuyển quy luật chẵn/lẻ của Filler NAL thành chuỗi bit, rồi đổi chuỗi bit đó thành thông điệp ASCII.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/filler_extract.py</span></pre>
         <p>Sửa hai dòng TODO thành:</p>
@@ -416,6 +430,7 @@
         <p>Chạy extractor:</p>
         <pre><span class="cmd">python3 tools/filler_extract.py evidence/warehouse-suspect.hevc &gt; filler_extract.py.stdout</span>
 <span class="cmd">cat filler_extract.py.stdout</span></pre>
+        <p>Dòng <code>bit = rec["ff_count"] % 2</code> lấy phần dư khi chia cho 2: chẵn thành 0, lẻ thành 1. Hàm <code>bits_to_text</code> ghép từng nhóm 8 bit thành một ký tự.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>FILLER_MESSAGE=HEVC{filler_nal_length_channel}</code>.
         </div>
@@ -425,10 +440,12 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 6 — Đối chiếu log audit</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> liên hệ kết quả kỹ thuật với dấu vết vận hành để tìm tài khoản đã xuất hoặc tải video nghi vấn.</p>
         <p>Đọc log và tìm dòng upload:</p>
         <pre><span class="cmd">cat evidence/export_audit.log</span>
 <span class="cmd">grep uploaded evidence/export_audit.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
+        <p>Đây là phần điều tra bối cảnh: sau khi đã biết video có kênh giấu tin, sinh viên cần xác định ai đã thao tác với file đó.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>ops-video12</code>.
         </div>
@@ -438,6 +455,7 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 7 — Viết kết luận</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> tổng hợp kết quả cuối cùng của ca điều tra: tài khoản nghi vấn, thông điệp khôi phục và kỹ thuật giấu tin đã dùng.</p>
         <p>Tạo file <code>answer.txt</code>:</p>
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>
