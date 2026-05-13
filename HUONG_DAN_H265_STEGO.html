@@ -439,14 +439,13 @@
       <div class="task-header">Nhiệm vụ 5 — Sửa tool giải mã SEI</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tìm SEI NAL, lấy payload loại <code>user_data_unregistered</code>, sau đó thử XOR để tìm plaintext.</p>
-        <p>File <code>tools/sei_probe.py</code> là script cần sửa trong nhiệm vụ này. Script dùng helper <code>tools/rbsp.py</code> để xử lý dữ liệu NAL. Kết quả giải mã được lưu vào <code>report/sei_decode.txt</code>.</p>
+        <p>File <code>tools/sei_probe.py</code> là script cần sửa trong nhiệm vụ này. Kết quả giải mã được lưu vào <code>report/sei_decode.txt</code>.</p>
         <p>Mở file <code>tools/sei_probe.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/sei_probe.py</span></pre>
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
             <li><strong>Cần sửa:</strong> <code>tools/sei_probe.py</code>.</li>
-            <li><strong>Không cần sửa:</strong> <code>tools/rbsp.py</code>, file này chỉ hỗ trợ xử lý NAL/RBSP.</li>
             <li>Cần hiểu 3 ý: lọc SEI type 39/40, chọn payload type 5, rồi thử XOR để tìm chuỗi bắt đầu bằng <code>HEVC-LAB{</code>.</li>
           </ul>
         </div>
@@ -493,13 +492,12 @@
           <strong>Giải thích cần biết:</strong><br />
           <ul>
             <li><strong>Cần sửa:</strong> <code>tools/vcl_extract.py</code>.</li>
-            <li><strong>Không cần sửa:</strong> <code>tools/nal_scan.py</code>, file này chỉ cung cấp cấu trúc NAL và thuộc tính <code>is_vcl</code>.</li>
             <li>Cần hiểu quy tắc: chỉ lấy VCL NAL, đếm byte <code>0x00</code> cuối payload, rồi ghép bit thành byte bằng dịch trái.</li>
           </ul>
         </div>
         <p>Cần sửa các phần sau:</p>
         <div class="box box-info">
-          <strong>TODO Task 6.1:</strong> chỉ lấy NAL loại VCL. Trong helper <code>nal_scan.py</code>, mỗi NAL có thuộc tính <code>is_vcl</code>.
+          <strong>TODO Task 6.1:</strong> chỉ lấy NAL loại VCL bằng thuộc tính <code>is_vcl</code>.
         </div>
         <pre><span class="cmd">if not nal.is_vcl:</span>
 <span class="cmd">    continue</span></pre>

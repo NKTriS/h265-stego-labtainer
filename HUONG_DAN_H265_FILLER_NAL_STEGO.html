@@ -441,14 +441,13 @@
       <div class="task-header">Nhiệm vụ 5 — Sửa extractor</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chuyển quy luật chẵn/lẻ của Filler NAL thành chuỗi bit, rồi đổi chuỗi bit đó thành thông điệp ASCII.</p>
-        <p>File <code>tools/filler_extract.py</code> là script cần sửa. File <code>tools/hevc_filler_common.py</code> là helper đọc NAL và xử lý filler. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
+        <p>File <code>tools/filler_extract.py</code> là script cần sửa. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/filler_extract.py</span></pre>
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
             <li><strong>Cần sửa:</strong> <code>tools/filler_extract.py</code>.</li>
-            <li><strong>Không cần sửa:</strong> <code>tools/hevc_filler_common.py</code>, file này chỉ hỗ trợ đọc NAL/filler.</li>
             <li><code>ff_count % 2</code> lấy chẵn/lẻ để tạo bit; <code>bits_to_text(bits)</code> ghép các bit thành chuỗi.</li>
           </ul>
         </div>
