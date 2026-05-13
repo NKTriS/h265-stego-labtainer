@@ -330,6 +330,46 @@
       </tr>
     </table>
 
+    <h3>Giải thích file và công cụ trong lab</h3>
+    <table>
+      <tr>
+        <th>File / thư mục</th>
+        <th>Ý nghĩa</th>
+      </tr>
+      <tr>
+        <td><code>evidence/warehouse-clean.hevc</code></td>
+        <td>Video sạch, dùng làm mốc so sánh. File này không chứa kênh giấu tin của bài.</td>
+      </tr>
+      <tr>
+        <td><code>evidence/warehouse-suspect.hevc</code></td>
+        <td>Video nghi vấn. Video vẫn xem được, nhưng có thêm Filler Data NAL dùng để mang thông điệp ẩn.</td>
+      </tr>
+      <tr>
+        <td><code>evidence/export_audit.log</code></td>
+        <td>Log vận hành cho biết tài khoản nào đã upload hoặc export video nghi vấn.</td>
+      </tr>
+      <tr>
+        <td><code>tools/nal_compare.py</code></td>
+        <td>So sánh số lượng NAL giữa video sạch và video nghi vấn để phát hiện Filler NAL bất thường.</td>
+      </tr>
+      <tr>
+        <td><code>tools/filler_dump.py</code></td>
+        <td>Liệt kê các Filler NAL và số byte <code>0xff</code> trong từng NAL.</td>
+      </tr>
+      <tr>
+        <td><code>tools/filler_extract.py</code></td>
+        <td>Tool cần sửa. Sinh viên lấy bit từ chẵn/lẻ của số byte <code>0xff</code>, sau đó ghép thành thông điệp.</td>
+      </tr>
+      <tr>
+        <td><code>tools/hevc_filler_common.py</code></td>
+        <td>File helper để đọc NAL và xử lý dữ liệu filler. Không phải file chính cần sửa.</td>
+      </tr>
+      <tr>
+        <td><code>answer.txt</code></td>
+        <td>File kết luận cuối bài: user nghi vấn, thông điệp khôi phục và tên kỹ thuật.</td>
+      </tr>
+    </table>
+
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 1 terminal xuất hiện đại diện cho <code>workstation</code>. Terminal này chứa hai file video
     trong thư mục <code>evidence</code> và các công cụ phân tích trong thư mục <code>tools</code>.

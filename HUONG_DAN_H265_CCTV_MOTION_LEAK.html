@@ -331,6 +331,46 @@
       </tr>
     </table>
 
+    <h3>Giải thích file và công cụ trong lab</h3>
+    <table>
+      <tr>
+        <th>File / thành phần</th>
+        <th>Ý nghĩa</th>
+      </tr>
+      <tr>
+        <td><code>evidence-server</code></td>
+        <td>Container đóng vai máy chủ chứng cứ. Nó cung cấp video CCTV và log xuất file qua HTTP.</td>
+      </tr>
+      <tr>
+        <td><code>cctv.hevc</code></td>
+        <td>Video tải từ evidence-server về máy analyst. Đây là file chính cần điều tra.</td>
+      </tr>
+      <tr>
+        <td><code>curl.stdout</code></td>
+        <td>Log quá trình tải file bằng curl. File này giúp sinh viên kiểm tra có kết nối đúng tới máy chủ chứng cứ hay không.</td>
+      </tr>
+      <tr>
+        <td><code>transfer.pcap</code></td>
+        <td>File bắt gói mạng khi tải video. Dùng để chứng minh video đã được truyền qua HTTP trong lab.</td>
+      </tr>
+      <tr>
+        <td><code>tools/nal_overview.py</code></td>
+        <td>Kiểm tra nhanh cấu trúc NAL và xác nhận video không có dấu hiệu SEI đáng ngờ.</td>
+      </tr>
+      <tr>
+        <td><code>tools/mv_dump.py</code></td>
+        <td>In ra các mẫu motion vector để sinh viên quan sát cột <code>mv_x</code>.</td>
+      </tr>
+      <tr>
+        <td><code>tools/mv_extract.py</code></td>
+        <td>Tool cần sửa. Sinh viên hoàn thành phần lấy bit từ chẵn/lẻ của <code>mv_x</code> và ghép bit thành thông điệp.</td>
+      </tr>
+      <tr>
+        <td><code>answer.txt</code></td>
+        <td>File kết luận điều tra: ghi user nghi vấn, thông điệp khôi phục và kỹ thuật giấu tin.</td>
+      </tr>
+    </table>
+
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 2 container: <code>analyst</code> và <code>evidence-server</code>. Sinh viên chủ yếu thao
     tác trong terminal <code>ubuntu@analyst</code>.

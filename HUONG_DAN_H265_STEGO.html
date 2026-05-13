@@ -329,6 +329,42 @@
       </tr>
     </table>
 
+    <h3>Giải thích file và công cụ trong lab</h3>
+    <table>
+      <tr>
+        <th>File / thư mục</th>
+        <th>Ý nghĩa</th>
+      </tr>
+      <tr>
+        <td><code>evidence/evidence.hevc</code></td>
+        <td>Video H.265 nghi vấn. Đây là file chính cần phân tích để tìm dữ liệu bị giấu.</td>
+      </tr>
+      <tr>
+        <td><code>evidence/clean.hevc</code></td>
+        <td>Bản video sạch dùng để tham khảo. Sinh viên có thể so sánh với file nghi vấn nếu muốn hiểu sự khác biệt.</td>
+      </tr>
+      <tr>
+        <td><code>report/</code></td>
+        <td>Thư mục lưu kết quả từng nhiệm vụ. Các file trong thư mục này là ghi chép điều tra của sinh viên.</td>
+      </tr>
+      <tr>
+        <td><code>tools/nal_scan.py</code></td>
+        <td>Quét file HEVC, tách các NAL unit và thống kê số lượng VPS, SPS, PPS, SEI, VCL.</td>
+      </tr>
+      <tr>
+        <td><code>tools/sei_probe.py</code></td>
+        <td>Tool cần sửa ở nhiệm vụ SEI. Mục tiêu là lọc đúng SEI NAL, đọc payload và giải mã chuỗi bị XOR.</td>
+      </tr>
+      <tr>
+        <td><code>tools/vcl_extract.py</code></td>
+        <td>Tool cần sửa ở nhiệm vụ VCL. Mục tiêu là lấy bit ẩn từ phần byte đệm cuối các VCL NAL.</td>
+      </tr>
+      <tr>
+        <td><code>tools/rbsp.py</code></td>
+        <td>File helper xử lý RBSP/NAL. Sinh viên chỉ cần biết tool khác dùng file này, không cần sửa.</td>
+      </tr>
+    </table>
+
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 1 terminal xuất hiện đại diện cho <code>workstation</code>. Sinh viên làm bài trong terminal
     <code>ubuntu@workstation</code>. Mỗi task cần tạo file kết quả trong thư mục <code>report</code>.
