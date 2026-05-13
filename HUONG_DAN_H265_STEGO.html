@@ -346,6 +346,9 @@
         <pre><span class="cmd">cd ~/labtainer/labtainer-student</span>
 <span class="cmd">imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-stego.tar.gz</span>
 <span class="cmd">labtainer h265-stego</span></pre>
+        <p>Nếu máy đã từng chạy bản cũ của lab, nên xóa cache trước khi tải lại:</p>
+        <pre><span class="cmd">rm -rf ~/labtainer/trunk/labs/h265-stego</span>
+<span class="cmd">rm -rf ~/labtainer_xfer/h265-stego</span></pre>
         <p>Trong terminal <code>workstation</code>, kiểm tra các thư mục cần dùng:</p>
         <pre><span class="cmd">ls</span>
 <span class="cmd">ls evidence tools report</span></pre>
@@ -355,9 +358,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 1 — Ghi thông tin codec</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xác nhận file chứng cứ là luồng video H.265 thật, không phải file giả mạo đổi đuôi.</p>
         <p>Dùng <code>ffprobe</code> để lấy thông tin codec, kích thước và frame rate:</p>
         <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/evidence.hevc &gt; report/video_info.txt</span>
 <span class="cmd">cat report/video_info.txt</span></pre>
+        <p>Khi xem file kết quả, cần chú ý dòng <code>codec_name=hevc</code>. Đây là dấu hiệu cho thấy file được giải mã như video H.265/HEVC.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/video_info.txt</code> có <code>codec_name=hevc</code>.
         </div>
@@ -367,9 +372,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 2 — Xem header Annex B bằng hex</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> nhận diện dạng Annex B của HEVC. Dạng này thường có start code <code>00 00 00 01</code> trước mỗi NAL unit.</p>
         <p>Dùng <code>xxd</code> để xem 96 byte đầu file:</p>
         <pre><span class="cmd">xxd -l 96 evidence/evidence.hevc &gt; report/header_hex.txt</span>
 <span class="cmd">cat report/header_hex.txt</span></pre>
+        <p>Dòng đầu cần bắt đầu bằng <code>00000000: 0000 0001</code>. Nếu thấy giá trị này, sinh viên có thể hiểu file đang dùng start code Annex B.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/header_hex.txt</code> có <code>00000000: 0000 0001</code>.
         </div>
@@ -379,9 +386,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 3 — Quét NAL unit</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xem file có bao nhiêu NAL unit và phân biệt nhóm VCL, VPS, SPS, PPS, SEI.</p>
         <p>Chạy tool quét bố cục NAL:</p>
         <pre><span class="cmd">python3 tools/nal_scan.py evidence/evidence.hevc &gt; report/nal_scan.txt</span>
 <span class="cmd">cat report/nal_scan.txt</span></pre>
+        <p>Cuối output sẽ có dòng tổng hợp. Trong bài này dòng cần quan sát là <code>NAL_SUMMARY=171:5:5:5:6:150</code>, nghĩa là file có 171 NAL, trong đó có 150 NAL loại VCL.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/nal_scan.txt</code> có <code>NAL_SUMMARY=171:5:5:5:6:150</code>.
         </div>
@@ -391,9 +400,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 4 — Tìm dấu vết SEI dạng ASCII</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> kiểm tra xem trong file có chuỗi ASCII đáng ngờ hay không. Với dữ liệu giấu trong SEI, đôi khi UUID hoặc nhãn nhận diện vẫn có thể thấy bằng <code>strings</code>.</p>
         <p>Dùng <code>strings</code> kết hợp <code>grep</code> để tìm chuỗi gợi ý:</p>
         <pre><span class="cmd">strings evidence/evidence.hevc | grep HE265LAB &gt; report/sei_hint.txt</span>
 <span class="cmd">cat report/sei_hint.txt</span></pre>
+        <p>Nếu thấy <code>HE265LABSTEGO001</code>, đó là dấu hiệu cho biết có SEI user data cần phân tích sâu hơn.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/sei_hint.txt</code> có <code>HE265LABSTEGO001</code>.
         </div>
@@ -403,8 +414,26 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 5 — Sửa tool giải mã SEI</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> tìm SEI NAL, lấy payload loại <code>user_data_unregistered</code>, sau đó thử XOR để tìm plaintext.</p>
         <p>Mở file <code>tools/sei_probe.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/sei_probe.py</span></pre>
+        <p>Cần sửa các phần sau:</p>
+        <div class="box box-info">
+          <strong>TODO Task 5.1:</strong> chỉ xử lý SEI NAL type 39 hoặc 40.<br />
+          Thay điều kiện <code>if True:</code> thành:
+        </div>
+        <pre><span class="cmd">if nal.nal_type not in (39, 40):</span></pre>
+        <div class="box box-info">
+          <strong>TODO Task 5.2:</strong> payload <code>user_data_unregistered</code> có <code>payload_type == 5</code> và dài hơn 16 byte UUID.<br />
+          Thay <code>if False:</code> thành:
+        </div>
+        <pre><span class="cmd">if payload_type == 5 and len(payload) &gt;= 16:</span></pre>
+        <div class="box box-info">
+          <strong>TODO Task 5.3 và 5.4:</strong> thử XOR từng byte với khóa từ 0 đến 255, chọn plaintext bắt đầu bằng <code>HEVC-LAB{</code>.
+        </div>
+        <pre><span class="cmd">text = bytes(byte ^ key for byte in payload)</span>
+<span class="cmd">if text.startswith(b"HEVC-LAB{"):</span></pre>
+        <p>Lưu file bằng <code>Ctrl + O</code>, <code>Enter</code>, thoát bằng <code>Ctrl + X</code>.</p>
         <p>Sau khi sửa, chạy tool:</p>
         <pre><span class="cmd">python3 tools/sei_probe.py evidence/evidence.hevc &gt; report/sei_decode.txt</span>
 <span class="cmd">cat report/sei_decode.txt</span></pre>
@@ -417,9 +446,24 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 6 — Sửa tool tách thông điệp trong VCL slice</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> tách bit được giấu ở phần byte 0 cuối payload của các VCL NAL.</p>
         <p>Mở file <code>tools/vcl_extract.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/vcl_extract.py</span></pre>
-        <p>Sau khi sửa, chạy tool:</p>
+        <p>Cần sửa các phần sau:</p>
+        <div class="box box-info">
+          <strong>TODO Task 6.1:</strong> chỉ lấy NAL loại VCL. Trong helper <code>nal_scan.py</code>, mỗi NAL có thuộc tính <code>is_vcl</code>.
+        </div>
+        <pre><span class="cmd">if not nal.is_vcl:</span>
+<span class="cmd">    continue</span></pre>
+        <div class="box box-info">
+          <strong>TODO Task 6.2:</strong> đếm số byte <code>0x00</code> ở cuối NAL payload.
+        </div>
+        <pre><span class="cmd">zero_count = len(nal.data) - len(nal.data.rstrip(b"\x00"))</span></pre>
+        <div class="box box-info">
+          <strong>TODO Task 6.3:</strong> ghép 8 bit thành 1 byte theo thứ tự bit cao trước.
+        </div>
+        <pre><span class="cmd">value = (value &lt;&lt; 1) | bit</span></pre>
+        <p>Lưu file, sau đó chạy tool:</p>
         <pre><span class="cmd">python3 tools/vcl_extract.py evidence/evidence.hevc &gt; report/vcl_message.txt</span>
 <span class="cmd">cat report/vcl_message.txt</span></pre>
         <div class="box box-success">
@@ -431,6 +475,44 @@
     <h2>5. Kiểm tra kết quả bài thực hành</h2>
     <p>Trên terminal <code>student@ubuntu</code>, chạy:</p>
     <pre><span class="cmd">checkwork h265-stego</span></pre>
+
+    <table>
+      <tr>
+        <th>Mục chấm</th>
+        <th>File/output được kiểm tra</th>
+        <th>Cần có</th>
+      </tr>
+      <tr>
+        <td><code>cw1</code></td>
+        <td><code>report/video_info.txt</code></td>
+        <td><code>codec_name=hevc</code></td>
+      </tr>
+      <tr>
+        <td><code>cw2</code></td>
+        <td><code>report/header_hex.txt</code></td>
+        <td><code>00000000: 0000 0001</code></td>
+      </tr>
+      <tr>
+        <td><code>cw3</code></td>
+        <td><code>report/nal_scan.txt</code></td>
+        <td><code>NAL_SUMMARY=171:5:5:5:6:150</code></td>
+      </tr>
+      <tr>
+        <td><code>cw4</code></td>
+        <td><code>report/sei_hint.txt</code></td>
+        <td><code>HE265LABSTEGO001</code></td>
+      </tr>
+      <tr>
+        <td><code>cw5</code></td>
+        <td><code>report/sei_decode.txt</code></td>
+        <td><code>SEI_MESSAGE=HEVC-LAB{metadata_is_not_pixels}</code></td>
+      </tr>
+      <tr>
+        <td><code>cw6</code></td>
+        <td><code>report/vcl_message.txt</code></td>
+        <td><code>SLICE_MESSAGE=SLICE:qpel_path</code></td>
+      </tr>
+    </table>
 
     <div class="box box-success">
       <strong>Kết quả kỳ vọng:</strong> Các mục <code>cw1</code> đến <code>cw6</code> đều hiển thị <code>Y</code>.

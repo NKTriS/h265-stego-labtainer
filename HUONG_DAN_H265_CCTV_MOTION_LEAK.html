@@ -348,6 +348,9 @@
         <pre><span class="cmd">cd ~/labtainer/labtainer-student</span>
 <span class="cmd">imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-cctv-motion-leak.tar.gz</span>
 <span class="cmd">labtainer h265-cctv-motion-leak</span></pre>
+        <p>Nếu máy đã từng chạy bản cũ của lab, nên xóa cache trước khi tải lại:</p>
+        <pre><span class="cmd">rm -rf ~/labtainer/trunk/labs/h265-cctv-motion-leak</span>
+<span class="cmd">rm -rf ~/labtainer_xfer/h265-cctv-motion-leak</span></pre>
         <p>Trong terminal <code>analyst</code>, kiểm tra thư mục làm việc:</p>
         <pre><span class="cmd">ls</span>
 <span class="cmd">ls tools</span></pre>
@@ -357,10 +360,12 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 1 — Lấy chứng cứ từ evidence-server</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> lấy video nghi vấn từ máy chủ nội bộ. Đây là chứng cứ chính cần phân tích trong các task sau.</p>
         <p>Tải file video từ máy chủ chứng cứ:</p>
         <pre><span class="cmd">curl -v http://evidence-server:8080/case/cctv.hevc -o cctv.hevc &gt; curl.stdout 2&gt;&amp;1</span>
 <span class="cmd">cat curl.stdout</span>
 <span class="cmd">ls -lh cctv.hevc</span></pre>
+        <p>Trong <code>curl.stdout</code>, cần thấy kết nối tới <code>evidence-server</code> và phản hồi HTTP thành công. File tải về tên là <code>cctv.hevc</code>.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>curl.stdout</code> có chuỗi <code>evidence-server</code>.
         </div>
@@ -370,10 +375,12 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 2 — Kiểm tra video H.265</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xác nhận file tải về là video H.265 thật, không phải file text hoặc dữ liệu giả.</p>
         <p>Dùng <code>file</code> và <code>ffprobe</code> để kiểm tra video:</p>
         <pre><span class="cmd">file cctv.hevc</span>
 <span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 cctv.hevc &gt; ffprobe.stdout</span>
 <span class="cmd">cat ffprobe.stdout</span></pre>
+        <p>Output cần có <code>codec_name=hevc</code>. Nếu không có dòng này, các bước phân tích bitstream phía sau không có ý nghĩa.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>ffprobe.stdout</code> có <code>codec_name=hevc</code>.
         </div>
@@ -383,11 +390,15 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 3 — Bắt gói quá trình tải file</div>
       <div class="task-body">
-        <p>Mở một terminal <code>analyst</code> khác hoặc chạy tcpdump nền:</p>
+        <p><strong>Mục đích:</strong> lưu lại bằng chứng mạng cho thấy file video được tải từ <code>evidence-server</code> qua HTTP.</p>
+        <p>Cách dễ nhất là chạy <code>tcpdump</code> nền, sau đó tải lại file bằng <code>curl</code>:</p>
         <pre><span class="cmd">sudo tcpdump -i eth0 -w transfer.pcap -Z root host evidence-server &gt; tcpdump.stdout 2&gt;&amp;1 &amp;</span></pre>
         <p>Sau đó tải lại video để tạo traffic HTTP:</p>
         <pre><span class="cmd">curl http://evidence-server:8080/case/cctv.hevc -o cctv.hevc</span></pre>
-        <p>Dừng tcpdump nếu đang chạy foreground bằng <code>Ctrl+C</code>.</p>
+        <p>Kiểm tra file pcap đã được tạo:</p>
+        <pre><span class="cmd">ls -lh transfer.pcap</span>
+<span class="cmd">cat tcpdump.stdout</span></pre>
+        <p>Nếu chạy <code>tcpdump</code> ở foreground, dừng bằng <code>Ctrl+C</code>. Tùy chọn <code>-Z root</code> giúp tránh lỗi quyền ghi file trong container.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>tcpdump.stdout</code> có chuỗi <code>tcpdump</code>.
         </div>
@@ -397,11 +408,13 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 4 — Kiểm tra không có SEI dễ thấy</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> chứng minh video không dùng kiểu giấu tin dễ thấy qua SEI/ASCII như lab 1.</p>
         <p>Thử tìm chuỗi rõ ràng trong video:</p>
         <pre><span class="cmd">strings cctv.hevc | grep HEVC</span></pre>
         <p>Chạy tool tổng quan NAL:</p>
         <pre><span class="cmd">python3 tools/nal_overview.py cctv.hevc &gt; nal_overview.py.stdout</span>
 <span class="cmd">cat nal_overview.py.stdout</span></pre>
+        <p>Kết quả <code>SEI_SUSPICIOUS=NO</code> nghĩa là không có dấu hiệu SEI rõ ràng. Vì vậy cần chuyển hướng sang phân tích motion vector.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>SEI_SUSPICIOUS=NO</code>.
         </div>
@@ -411,10 +424,11 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 5 — Xem mẫu motion vector</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> quan sát các mẫu <code>mv_x</code> được dùng làm carrier cho kênh giấu tin.</p>
         <p>Dump các mẫu motion vector:</p>
         <pre><span class="cmd">python3 tools/mv_dump.py cctv.hevc &gt; mv_dump.py.stdout</span>
 <span class="cmd">cat mv_dump.py.stdout</span></pre>
-        <p>Quan sát tính chẵn/lẻ của cột <code>mv_x</code>.</p>
+        <p>Output gồm nhiều dòng dạng <code>frame=... block=... mv_x=... mv_y=...</code>. Quan sát tính chẵn/lẻ của cột <code>mv_x</code>. Cuối file cần có <code>MV_RECORDS=200</code>.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>MV_RECORDS=200</code>.
         </div>
@@ -424,11 +438,19 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 6 — Sửa extractor để khôi phục thông điệp</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> chuyển dãy parity của <code>mv_x</code> thành bit, rồi ghép 8 bit thành ký tự ASCII.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/mv_extract.py</span></pre>
-        <p>Hoàn thành các dòng <code>TODO</code> theo quy tắc:</p>
-        <pre><span class="cmd">mv_x chẵn -&gt; bit 0</span>
-<span class="cmd">mv_x lẻ   -&gt; bit 1</span></pre>
+        <p>Trong file có hai phần cần sửa:</p>
+        <div class="box box-info">
+          <strong>TODO Task 6.1:</strong> lấy bit từ tính chẵn/lẻ của <code>mv_x</code>. Vì <code>mv_x</code> có thể âm, nên dùng <code>abs()</code>.
+        </div>
+        <pre><span class="cmd">bit = abs(rec.mv_x) % 2</span></pre>
+        <div class="box box-info">
+          <strong>TODO Task 6.2:</strong> ghép bit vào byte theo thứ tự bit cao trước.
+        </div>
+        <pre><span class="cmd">value = (value &lt;&lt; 1) | bit</span></pre>
+        <p>Lưu file bằng <code>Ctrl + O</code>, <code>Enter</code>, thoát bằng <code>Ctrl + X</code>.</p>
         <p>Chạy extractor:</p>
         <pre><span class="cmd">python3 tools/mv_extract.py cctv.hevc &gt; mv_extract.py.stdout</span>
 <span class="cmd">cat mv_extract.py.stdout</span></pre>
@@ -441,10 +463,12 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 7 — Đối chiếu log máy chủ</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> xác định user đã upload/export video nghi vấn.</p>
         <p>Tải hoặc đọc log từ evidence-server:</p>
         <pre><span class="cmd">curl http://evidence-server:8080/logs/cctv_export.log -o cctv_export.log</span>
 <span class="cmd">grep uploaded cctv_export.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
+        <p>Dòng log cần tìm có user <code>intern01</code>. Đây là tài khoản đáng ngờ trong kịch bản.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>intern01</code>.
         </div>
@@ -454,6 +478,7 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 8 — Viết kết luận điều tra</div>
       <div class="task-body">
+        <p><strong>Mục đích:</strong> tổng hợp kết quả điều tra gồm user đáng ngờ, thông điệp khôi phục và kỹ thuật giấu tin.</p>
         <p>Tạo file kết luận:</p>
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>
@@ -467,6 +492,54 @@
     <h2>5. Kiểm tra kết quả bài thực hành</h2>
     <p>Trên terminal <code>student@ubuntu</code>, chạy:</p>
     <pre><span class="cmd">checkwork h265-cctv-motion-leak</span></pre>
+
+    <table>
+      <tr>
+        <th>Mục chấm</th>
+        <th>File/output được kiểm tra</th>
+        <th>Cần có</th>
+      </tr>
+      <tr>
+        <td><code>cw1</code></td>
+        <td><code>curl.stdout</code></td>
+        <td><code>evidence-server</code></td>
+      </tr>
+      <tr>
+        <td><code>cw2</code></td>
+        <td><code>ffprobe.stdout</code></td>
+        <td><code>codec_name=hevc</code></td>
+      </tr>
+      <tr>
+        <td><code>cw3</code></td>
+        <td><code>tcpdump.stdout</code></td>
+        <td><code>tcpdump</code></td>
+      </tr>
+      <tr>
+        <td><code>cw4</code></td>
+        <td><code>nal_overview.py.stdout</code></td>
+        <td><code>SEI_SUSPICIOUS=NO</code></td>
+      </tr>
+      <tr>
+        <td><code>cw5</code></td>
+        <td><code>mv_dump.py.stdout</code></td>
+        <td><code>MV_RECORDS=200</code></td>
+      </tr>
+      <tr>
+        <td><code>cw6</code></td>
+        <td><code>mv_extract.py.stdout</code></td>
+        <td><code>MV_MESSAGE=HEVC{motion_leak_in_cctv}</code></td>
+      </tr>
+      <tr>
+        <td><code>cw7</code></td>
+        <td><code>grep.stdout</code></td>
+        <td><code>intern01</code></td>
+      </tr>
+      <tr>
+        <td><code>cw8</code></td>
+        <td><code>answer.txt</code></td>
+        <td><code>intern01</code>, <code>HEVC{motion_leak_in_cctv}</code>, <code>MVX_LSB</code></td>
+      </tr>
+    </table>
 
     <div class="box box-success">
       <strong>Kết quả kỳ vọng:</strong> Các mục <code>cw1</code> đến <code>cw8</code> đều hiển thị <code>Y</code>.
