@@ -344,6 +344,7 @@
     <div class="box box-info">
       <strong>Cách hiểu luồng bài:</strong><br />
       Bài lab mô phỏng một ca điều tra rò rỉ video từ máy chủ nội bộ. Sinh viên phải lấy file từ <code>evidence-server</code>, lưu lại bằng chứng mạng, kiểm tra rằng video không có dấu SEI rõ ràng, rồi chuyển sang phân tích motion vector. Điểm chính của bài là thông điệp không nằm trong metadata mà nằm ở tính chẵn/lẻ của <code>mv_x</code>.
+      Trong từng nhiệm vụ, phần giải thích chỉ tập trung vào file, lệnh hoặc dòng output cần hiểu để làm đúng bước đó.
     </div>
 
     <div class="task-block">
@@ -372,7 +373,7 @@
 <span class="cmd">cat curl.stdout</span>
 <span class="cmd">ls -lh cctv.hevc</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>curl</code> tải file qua HTTP. <code>-v</code> bật chế độ verbose để ghi rõ IP, cổng, request và response. URL <code>http://evidence-server:8080/case/cctv.hevc</code> trỏ tới file chứng cứ trên container server. <code>-o cctv.hevc</code> lưu nội dung tải về thành file <code>cctv.hevc</code>. <code>&gt; curl.stdout 2&gt;&amp;1</code> lưu cả output thường và lỗi vào <code>curl.stdout</code>. <code>ls -lh</code> kiểm tra file đã tồn tại và xem dung lượng.
         </div>
         <p>Trong <code>curl.stdout</code>, cần thấy kết nối tới <code>evidence-server</code> và phản hồi HTTP thành công. File tải về tên là <code>cctv.hevc</code>.</p>
@@ -392,7 +393,7 @@
 <span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 cctv.hevc &gt; ffprobe.stdout</span>
 <span class="cmd">cat ffprobe.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>file cctv.hevc</code> nhận diện loại file ở mức hệ điều hành. <code>ffprobe</code> đọc thông tin stream bên trong video. <code>-select_streams v:0</code> chọn stream video đầu tiên, <code>-show_entries</code> giới hạn các trường cần xem, và <code>-of default=noprint_wrappers=1</code> in output gọn theo dạng <code>key=value</code>. Kết quả lưu vào <code>ffprobe.stdout</code>.
         </div>
         <p>Output cần có <code>codec_name=hevc</code>. Nếu không có dòng này, các bước phân tích bitstream phía sau không có ý nghĩa.</p>
@@ -415,7 +416,7 @@
         <pre><span class="cmd">ls -lh transfer.pcap</span>
 <span class="cmd">cat tcpdump.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>sudo</code> cấp quyền bắt gói mạng. <code>tcpdump -i eth0</code> nghe trên card mạng của container analyst. <code>-w transfer.pcap</code> ghi gói vào file pcap để phân tích lại. <code>-Z root</code> giữ quyền ghi file ổn định trong môi trường container. Bộ lọc <code>host evidence-server</code> chỉ bắt traffic tới hoặc từ máy chủ chứng cứ. Dấu <code>&amp;</code> cho tcpdump chạy nền để có thể gõ lệnh <code>curl</code> tạo traffic.
         </div>
         <p>Nếu chạy <code>tcpdump</code> ở foreground, dừng bằng <code>Ctrl+C</code>. Tùy chọn <code>-Z root</code> giúp tránh lỗi quyền ghi file trong container.</p>
@@ -436,7 +437,7 @@
         <pre><span class="cmd">python3 tools/nal_overview.py cctv.hevc &gt; nal_overview.py.stdout</span>
 <span class="cmd">cat nal_overview.py.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>strings ... | grep HEVC</code> kiểm tra nhanh xem file có chuỗi ASCII rõ ràng hay không. Nếu không thấy gì đáng kể, sinh viên chạy <code>tools/nal_overview.py</code> để kiểm tra cấu trúc NAL. File <code>nal_overview.py.stdout</code> là bản ghi kết quả tổng quan, dùng để chuyển hướng điều tra sang motion vector.
         </div>
         <p>Kết quả <code>SEI_SUSPICIOUS=NO</code> nghĩa là không có dấu hiệu SEI rõ ràng. Vì vậy cần chuyển hướng sang phân tích motion vector.</p>
@@ -455,7 +456,7 @@
         <pre><span class="cmd">python3 tools/mv_dump.py cctv.hevc &gt; mv_dump.py.stdout</span>
 <span class="cmd">cat mv_dump.py.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>tools/mv_dump.py</code> đọc dữ liệu motion vector mô phỏng đã được chuẩn bị trong video. Output được lưu vào <code>mv_dump.py.stdout</code>. Các cột <code>frame</code> và <code>block</code> cho biết vị trí mẫu, <code>mv_x</code> là thành phần dùng để giấu bit, còn <code>mv_y</code> chỉ là thông tin phụ để dữ liệu trông giống mẫu motion vector thật.
         </div>
         <p>Output gồm nhiều dòng dạng <code>frame=... block=... mv_x=... mv_y=...</code>. Quan sát tính chẵn/lẻ của cột <code>mv_x</code>. Cuối file cần có <code>MV_RECORDS=200</code>.</p>
@@ -473,7 +474,7 @@
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/mv_extract.py</span></pre>
         <div class="box box-info">
-          <strong>Giải thích file:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>mv_extract.py</code> đã có sẵn phần đọc dữ liệu và ghép byte. Sinh viên chỉ cần hoàn thiện phần lấy bit từ <code>mv_x</code>. <code>nano</code> là trình soạn thảo trong terminal; sau khi sửa dùng <code>Ctrl + O</code>, <code>Enter</code>, <code>Ctrl + X</code> để lưu và thoát.
         </div>
         <p>Trong file có hai phần cần sửa:</p>
@@ -490,7 +491,7 @@
         <pre><span class="cmd">python3 tools/mv_extract.py cctv.hevc &gt; mv_extract.py.stdout</span>
 <span class="cmd">cat mv_extract.py.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           Lệnh chạy script sau khi đã sửa. Dấu <code>&gt;</code> lưu kết quả vào <code>mv_extract.py.stdout</code>. Nếu logic đúng, file này sẽ có dòng <code>MV_MESSAGE</code>; nếu sai, thông điệp có thể rỗng, sai ký tự hoặc không xuất hiện.
         </div>
         <div class="box box-success">
@@ -509,7 +510,7 @@
 <span class="cmd">grep uploaded cctv_export.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
         <div class="box box-info">
-          <strong>Giải thích lệnh:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           Lệnh <code>curl</code> tải log audit từ server về file <code>cctv_export.log</code>. <code>grep uploaded</code> lọc các dòng liên quan tới hành động upload. Kết quả lọc được lưu vào <code>grep.stdout</code> để sinh viên đọc lại và lấy user nghi vấn.
         </div>
         <p>Dòng log cần tìm có user <code>intern01</code>. Đây là tài khoản đáng ngờ trong kịch bản.</p>
@@ -529,7 +530,7 @@
         <p>Nội dung cần ghi:</p>
         <pre><span class="cmd">intern01 HEVC{motion_leak_in_cctv} MVX_LSB</span></pre>
         <div class="box box-info">
-          <strong>Giải thích file:</strong><br />
+          <strong>Giải thích cần biết:</strong><br />
           <code>answer.txt</code> là file kết luận cuối bài. Ba phần trong file lần lượt là tài khoản nghi vấn, thông điệp khôi phục từ motion vector và tên kỹ thuật giấu tin. File này buộc sinh viên tổng hợp kết quả thay vì chỉ chạy tool.
         </div>
         <div class="box box-success">
