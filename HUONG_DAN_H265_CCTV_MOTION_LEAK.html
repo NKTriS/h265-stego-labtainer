@@ -331,46 +331,6 @@
       </tr>
     </table>
 
-    <h3>Giải thích file và công cụ trong lab</h3>
-    <table>
-      <tr>
-        <th>File / thành phần</th>
-        <th>Ý nghĩa</th>
-      </tr>
-      <tr>
-        <td><code>evidence-server</code></td>
-        <td>Container đóng vai máy chủ chứng cứ. Nó cung cấp video CCTV và log xuất file qua HTTP.</td>
-      </tr>
-      <tr>
-        <td><code>cctv.hevc</code></td>
-        <td>Video tải từ evidence-server về máy analyst. Đây là file chính cần điều tra.</td>
-      </tr>
-      <tr>
-        <td><code>curl.stdout</code></td>
-        <td>Log quá trình tải file bằng curl. File này giúp sinh viên kiểm tra có kết nối đúng tới máy chủ chứng cứ hay không.</td>
-      </tr>
-      <tr>
-        <td><code>transfer.pcap</code></td>
-        <td>File bắt gói mạng khi tải video. Dùng để chứng minh video đã được truyền qua HTTP trong lab.</td>
-      </tr>
-      <tr>
-        <td><code>tools/nal_overview.py</code></td>
-        <td>Kiểm tra nhanh cấu trúc NAL và xác nhận video không có dấu hiệu SEI đáng ngờ.</td>
-      </tr>
-      <tr>
-        <td><code>tools/mv_dump.py</code></td>
-        <td>In ra các mẫu motion vector để sinh viên quan sát cột <code>mv_x</code>.</td>
-      </tr>
-      <tr>
-        <td><code>tools/mv_extract.py</code></td>
-        <td>Tool cần sửa. Sinh viên hoàn thành phần lấy bit từ chẵn/lẻ của <code>mv_x</code> và ghép bit thành thông điệp.</td>
-      </tr>
-      <tr>
-        <td><code>answer.txt</code></td>
-        <td>File kết luận điều tra: ghi user nghi vấn, thông điệp khôi phục và kỹ thuật giấu tin.</td>
-      </tr>
-    </table>
-
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 2 container: <code>analyst</code> và <code>evidence-server</code>. Sinh viên chủ yếu thao
     tác trong terminal <code>ubuntu@analyst</code>.
@@ -406,6 +366,7 @@
       <div class="task-header">Nhiệm vụ 1 — Lấy chứng cứ từ evidence-server</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> lấy video nghi vấn từ máy chủ nội bộ. Đây là chứng cứ chính cần phân tích trong các task sau.</p>
+        <p>Container <code>evidence-server</code> đóng vai máy chủ chứng cứ. File tải về được lưu thành <code>cctv.hevc</code> trên máy <code>analyst</code>. File <code>curl.stdout</code> lưu lại log kết nối HTTP để sinh viên kiểm tra quá trình tải.</p>
         <p>Tải file video từ máy chủ chứng cứ:</p>
         <pre><span class="cmd">curl -v http://evidence-server:8080/case/cctv.hevc -o cctv.hevc &gt; curl.stdout 2&gt;&amp;1</span>
 <span class="cmd">cat curl.stdout</span>
@@ -421,6 +382,7 @@
       <div class="task-header">Nhiệm vụ 2 — Kiểm tra video H.265</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xác nhận file tải về là video H.265 thật, không phải file text hoặc dữ liệu giả.</p>
+        <p>File <code>ffprobe.stdout</code> là bản ghi thông tin video. Sinh viên đọc file này để biết codec, kích thước và frame rate của <code>cctv.hevc</code>.</p>
         <p>Dùng <code>file</code> và <code>ffprobe</code> để kiểm tra video:</p>
         <pre><span class="cmd">file cctv.hevc</span>
 <span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 cctv.hevc &gt; ffprobe.stdout</span>
@@ -436,6 +398,7 @@
       <div class="task-header">Nhiệm vụ 3 — Bắt gói quá trình tải file</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> lưu lại bằng chứng mạng cho thấy file video được tải từ <code>evidence-server</code> qua HTTP.</p>
+        <p><code>transfer.pcap</code> là file bắt gói, còn <code>tcpdump.stdout</code> là log khi chạy tcpdump. Hai file này giúp sinh viên hiểu phần network forensic của bài, không chỉ phân tích file tĩnh.</p>
         <p>Cách dễ nhất là chạy <code>tcpdump</code> nền, sau đó tải lại file bằng <code>curl</code>:</p>
         <pre><span class="cmd">sudo tcpdump -i eth0 -w transfer.pcap -Z root host evidence-server &gt; tcpdump.stdout 2&gt;&amp;1 &amp;</span></pre>
         <p>Sau đó tải lại video để tạo traffic HTTP:</p>
@@ -454,6 +417,7 @@
       <div class="task-header">Nhiệm vụ 4 — Kiểm tra không có SEI dễ thấy</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chứng minh video không dùng kiểu giấu tin dễ thấy qua SEI/ASCII như lab 1.</p>
+        <p>Tool <code>tools/nal_overview.py</code> kiểm tra nhanh các NAL đáng chú ý. Output <code>nal_overview.py.stdout</code> giúp kết luận rằng không nên tiếp tục tìm SEI mà phải chuyển sang hướng motion vector.</p>
         <p>Thử tìm chuỗi rõ ràng trong video:</p>
         <pre><span class="cmd">strings cctv.hevc | grep HEVC</span></pre>
         <p>Chạy tool tổng quan NAL:</p>
@@ -470,6 +434,7 @@
       <div class="task-header">Nhiệm vụ 5 — Xem mẫu motion vector</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> quan sát các mẫu <code>mv_x</code> được dùng làm carrier cho kênh giấu tin.</p>
+        <p>Tool <code>tools/mv_dump.py</code> không giải mã thông điệp. Nó chỉ in mẫu motion vector để sinh viên nhìn thấy dữ liệu đầu vào trước khi viết quy tắc tách bit.</p>
         <p>Dump các mẫu motion vector:</p>
         <pre><span class="cmd">python3 tools/mv_dump.py cctv.hevc &gt; mv_dump.py.stdout</span>
 <span class="cmd">cat mv_dump.py.stdout</span></pre>
@@ -484,6 +449,7 @@
       <div class="task-header">Nhiệm vụ 6 — Sửa extractor để khôi phục thông điệp</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chuyển dãy parity của <code>mv_x</code> thành bit, rồi ghép 8 bit thành ký tự ASCII.</p>
+        <p>File <code>tools/mv_extract.py</code> là script cần sửa. Nó dùng dữ liệu mẫu motion vector và tạo output <code>mv_extract.py.stdout</code> chứa thông điệp khôi phục.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/mv_extract.py</span></pre>
         <p>Trong file có hai phần cần sửa:</p>
@@ -509,6 +475,7 @@
       <div class="task-header">Nhiệm vụ 7 — Đối chiếu log máy chủ</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xác định user đã upload/export video nghi vấn.</p>
+        <p>File <code>cctv_export.log</code> là log từ máy chủ chứng cứ. File <code>grep.stdout</code> lưu dòng log quan trọng để phục vụ kết luận điều tra.</p>
         <p>Tải hoặc đọc log từ evidence-server:</p>
         <pre><span class="cmd">curl http://evidence-server:8080/logs/cctv_export.log -o cctv_export.log</span>
 <span class="cmd">grep uploaded cctv_export.log &gt; grep.stdout</span>
@@ -524,6 +491,7 @@
       <div class="task-header">Nhiệm vụ 8 — Viết kết luận điều tra</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tổng hợp kết quả điều tra gồm user đáng ngờ, thông điệp khôi phục và kỹ thuật giấu tin.</p>
+        <p>File <code>answer.txt</code> là kết luận cuối cùng của sinh viên. Nội dung file này không phải output tool tự sinh mà là phần tổng hợp sau khi đã đọc video, log và thông điệp ẩn.</p>
         <p>Tạo file kết luận:</p>
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>

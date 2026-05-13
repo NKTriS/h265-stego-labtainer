@@ -330,46 +330,6 @@
       </tr>
     </table>
 
-    <h3>Giải thích file và công cụ trong lab</h3>
-    <table>
-      <tr>
-        <th>File / thư mục</th>
-        <th>Ý nghĩa</th>
-      </tr>
-      <tr>
-        <td><code>evidence/warehouse-clean.hevc</code></td>
-        <td>Video sạch, dùng làm mốc so sánh. File này không chứa kênh giấu tin của bài.</td>
-      </tr>
-      <tr>
-        <td><code>evidence/warehouse-suspect.hevc</code></td>
-        <td>Video nghi vấn. Video vẫn xem được, nhưng có thêm Filler Data NAL dùng để mang thông điệp ẩn.</td>
-      </tr>
-      <tr>
-        <td><code>evidence/export_audit.log</code></td>
-        <td>Log vận hành cho biết tài khoản nào đã upload hoặc export video nghi vấn.</td>
-      </tr>
-      <tr>
-        <td><code>tools/nal_compare.py</code></td>
-        <td>So sánh số lượng NAL giữa video sạch và video nghi vấn để phát hiện Filler NAL bất thường.</td>
-      </tr>
-      <tr>
-        <td><code>tools/filler_dump.py</code></td>
-        <td>Liệt kê các Filler NAL và số byte <code>0xff</code> trong từng NAL.</td>
-      </tr>
-      <tr>
-        <td><code>tools/filler_extract.py</code></td>
-        <td>Tool cần sửa. Sinh viên lấy bit từ chẵn/lẻ của số byte <code>0xff</code>, sau đó ghép thành thông điệp.</td>
-      </tr>
-      <tr>
-        <td><code>tools/hevc_filler_common.py</code></td>
-        <td>File helper để đọc NAL và xử lý dữ liệu filler. Không phải file chính cần sửa.</td>
-      </tr>
-      <tr>
-        <td><code>answer.txt</code></td>
-        <td>File kết luận cuối bài: user nghi vấn, thông điệp khôi phục và tên kỹ thuật.</td>
-      </tr>
-    </table>
-
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 1 terminal xuất hiện đại diện cho <code>workstation</code>. Terminal này chứa hai file video
     trong thư mục <code>evidence</code> và các công cụ phân tích trong thư mục <code>tools</code>.
@@ -403,6 +363,7 @@
       <div class="task-header">Nhiệm vụ 1 — So sánh hai file chứng cứ</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xác nhận hai file có nội dung nhị phân khác nhau dù cùng là video HEVC. Đây là dấu hiệu ban đầu cho thấy bản nghi vấn đã bị chỉnh sửa.</p>
+        <p><code>evidence/warehouse-clean.hevc</code> là video sạch dùng làm mốc so sánh. <code>evidence/warehouse-suspect.hevc</code> là video nghi vấn. File <code>sha256sum.stdout</code> lưu hash của cả hai file để chứng minh chúng khác nhau.</p>
         <p>Trong terminal <code>workstation</code>, xem các file chứng cứ và tính hash:</p>
         <pre><span class="cmd">ls evidence</span>
 <span class="cmd">sha256sum evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; sha256sum.stdout</span>
@@ -418,6 +379,7 @@
       <div class="task-header">Nhiệm vụ 2 — Xác nhận video H.265</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chứng minh file nghi vấn vẫn là video H.265 hợp lệ, không phải file dữ liệu giả được đổi đuôi.</p>
+        <p>File <code>ffprobe.stdout</code> ghi thông tin codec của video nghi vấn. Lệnh <code>ffplay</code> chỉ dùng để quan sát video, không tạo kết quả bắt buộc cho bài.</p>
         <p>Kiểm tra file nghi vấn bằng <code>ffprobe</code>:</p>
         <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/warehouse-suspect.hevc &gt; ffprobe.stdout</span>
 <span class="cmd">cat ffprobe.stdout</span></pre>
@@ -434,6 +396,7 @@
       <div class="task-header">Nhiệm vụ 3 — So sánh số lượng NAL</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tìm điểm khác biệt ở cấp NAL unit giữa video sạch và video nghi vấn.</p>
+        <p>Tool <code>tools/nal_compare.py</code> so sánh hai bitstream và tập trung vào số lượng Filler NAL. Output <code>nal_compare.py.stdout</code> cho biết bản nghi vấn có thêm filler bất thường hay không.</p>
         <p>Chạy tool so sánh NAL giữa bản sạch và bản nghi vấn:</p>
         <pre><span class="cmd">python3 tools/nal_compare.py evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; nal_compare.py.stdout</span>
 <span class="cmd">cat nal_compare.py.stdout</span></pre>
@@ -448,6 +411,7 @@
       <div class="task-header">Nhiệm vụ 4 — Dump Filler NAL</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xem từng Filler NAL có bao nhiêu byte <code>0xff</code> để chuẩn bị khôi phục bit ẩn.</p>
+        <p>Tool <code>tools/filler_dump.py</code> liệt kê từng Filler NAL. Output <code>filler_dump.py.stdout</code> là dữ liệu đầu vào để sinh viên nhận ra quy luật chẵn/lẻ.</p>
         <p>Dump các Filler NAL trong file nghi vấn:</p>
         <pre><span class="cmd">python3 tools/filler_dump.py evidence/warehouse-suspect.hevc &gt; filler_dump.py.stdout</span>
 <span class="cmd">cat filler_dump.py.stdout</span></pre>
@@ -462,6 +426,7 @@
       <div class="task-header">Nhiệm vụ 5 — Sửa extractor</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chuyển quy luật chẵn/lẻ của Filler NAL thành chuỗi bit, rồi đổi chuỗi bit đó thành thông điệp ASCII.</p>
+        <p>File <code>tools/filler_extract.py</code> là script cần sửa. File <code>tools/hevc_filler_common.py</code> là helper đọc NAL và xử lý filler, sinh viên không cần sửa. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/filler_extract.py</span></pre>
         <p>Sửa hai dòng TODO thành:</p>
@@ -481,6 +446,7 @@
       <div class="task-header">Nhiệm vụ 6 — Đối chiếu log audit</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> liên hệ kết quả kỹ thuật với dấu vết vận hành để tìm tài khoản đã xuất hoặc tải video nghi vấn.</p>
+        <p>File <code>evidence/export_audit.log</code> là log audit có sẵn trong lab. File <code>grep.stdout</code> lưu dòng log quan trọng sau khi lọc bằng <code>grep</code>.</p>
         <p>Đọc log và tìm dòng upload:</p>
         <pre><span class="cmd">cat evidence/export_audit.log</span>
 <span class="cmd">grep uploaded evidence/export_audit.log &gt; grep.stdout</span>
@@ -496,6 +462,7 @@
       <div class="task-header">Nhiệm vụ 7 — Viết kết luận</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tổng hợp kết quả cuối cùng của ca điều tra: tài khoản nghi vấn, thông điệp khôi phục và kỹ thuật giấu tin đã dùng.</p>
+        <p>File <code>answer.txt</code> là kết luận do sinh viên tự viết sau khi hoàn thành các bước phân tích, không phải file sinh tự động từ tool.</p>
         <p>Tạo file <code>answer.txt</code>:</p>
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>

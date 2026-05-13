@@ -329,42 +329,6 @@
       </tr>
     </table>
 
-    <h3>Giải thích file và công cụ trong lab</h3>
-    <table>
-      <tr>
-        <th>File / thư mục</th>
-        <th>Ý nghĩa</th>
-      </tr>
-      <tr>
-        <td><code>evidence/evidence.hevc</code></td>
-        <td>Video H.265 nghi vấn. Đây là file chính cần phân tích để tìm dữ liệu bị giấu.</td>
-      </tr>
-      <tr>
-        <td><code>evidence/clean.hevc</code></td>
-        <td>Bản video sạch dùng để tham khảo. Sinh viên có thể so sánh với file nghi vấn nếu muốn hiểu sự khác biệt.</td>
-      </tr>
-      <tr>
-        <td><code>report/</code></td>
-        <td>Thư mục lưu kết quả từng nhiệm vụ. Các file trong thư mục này là ghi chép điều tra của sinh viên.</td>
-      </tr>
-      <tr>
-        <td><code>tools/nal_scan.py</code></td>
-        <td>Quét file HEVC, tách các NAL unit và thống kê số lượng VPS, SPS, PPS, SEI, VCL.</td>
-      </tr>
-      <tr>
-        <td><code>tools/sei_probe.py</code></td>
-        <td>Tool cần sửa ở nhiệm vụ SEI. Mục tiêu là lọc đúng SEI NAL, đọc payload và giải mã chuỗi bị XOR.</td>
-      </tr>
-      <tr>
-        <td><code>tools/vcl_extract.py</code></td>
-        <td>Tool cần sửa ở nhiệm vụ VCL. Mục tiêu là lấy bit ẩn từ phần byte đệm cuối các VCL NAL.</td>
-      </tr>
-      <tr>
-        <td><code>tools/rbsp.py</code></td>
-        <td>File helper xử lý RBSP/NAL. Sinh viên chỉ cần biết tool khác dùng file này, không cần sửa.</td>
-      </tr>
-    </table>
-
     <h2>4. Các nhiệm vụ của bài thực hành</h2>
     Sau khi khởi động lab, có 1 terminal xuất hiện đại diện cho <code>workstation</code>. Sinh viên làm bài trong terminal
     <code>ubuntu@workstation</code>. Mỗi task cần tạo file kết quả trong thư mục <code>report</code>.
@@ -400,6 +364,7 @@
       <div class="task-header">Nhiệm vụ 1 — Ghi thông tin codec</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xác nhận file chứng cứ là luồng video H.265 thật, không phải file giả mạo đổi đuôi.</p>
+        <p>Trong nhiệm vụ này, <code>evidence/evidence.hevc</code> là video nghi vấn cần kiểm tra. Kết quả được lưu vào <code>report/video_info.txt</code> để làm ghi chép thông tin codec của ca điều tra.</p>
         <p>Dùng <code>ffprobe</code> để lấy thông tin codec, kích thước và frame rate:</p>
         <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/evidence.hevc &gt; report/video_info.txt</span>
 <span class="cmd">cat report/video_info.txt</span></pre>
@@ -414,6 +379,7 @@
       <div class="task-header">Nhiệm vụ 2 — Xem header Annex B bằng hex</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> nhận diện dạng Annex B của HEVC. Dạng này thường có start code <code>00 00 00 01</code> trước mỗi NAL unit.</p>
+        <p>File <code>report/header_hex.txt</code> lưu phần hex đầu file. Sinh viên dùng nó để nhìn trực tiếp start code thay vì chỉ tin vào kết quả của <code>ffprobe</code>.</p>
         <p>Dùng <code>xxd</code> để xem 96 byte đầu file:</p>
         <pre><span class="cmd">xxd -l 96 evidence/evidence.hevc &gt; report/header_hex.txt</span>
 <span class="cmd">cat report/header_hex.txt</span></pre>
@@ -428,6 +394,7 @@
       <div class="task-header">Nhiệm vụ 3 — Quét NAL unit</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xem file có bao nhiêu NAL unit và phân biệt nhóm VCL, VPS, SPS, PPS, SEI.</p>
+        <p>Tool <code>tools/nal_scan.py</code> đọc bitstream HEVC, tách từng NAL unit và in bảng thống kê. Output <code>report/nal_scan.txt</code> giúp xác định trong file có SEI và VCL để tiếp tục điều tra.</p>
         <p>Chạy tool quét bố cục NAL:</p>
         <pre><span class="cmd">python3 tools/nal_scan.py evidence/evidence.hevc &gt; report/nal_scan.txt</span>
 <span class="cmd">cat report/nal_scan.txt</span></pre>
@@ -442,6 +409,7 @@
       <div class="task-header">Nhiệm vụ 4 — Tìm dấu vết SEI dạng ASCII</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> kiểm tra xem trong file có chuỗi ASCII đáng ngờ hay không. Với dữ liệu giấu trong SEI, đôi khi UUID hoặc nhãn nhận diện vẫn có thể thấy bằng <code>strings</code>.</p>
+        <p>File <code>report/sei_hint.txt</code> chỉ là dấu vết ban đầu. Nó không phải thông điệp cuối, nhưng cho biết nên mở rộng phân tích vào SEI NAL.</p>
         <p>Dùng <code>strings</code> kết hợp <code>grep</code> để tìm chuỗi gợi ý:</p>
         <pre><span class="cmd">strings evidence/evidence.hevc | grep HE265LAB &gt; report/sei_hint.txt</span>
 <span class="cmd">cat report/sei_hint.txt</span></pre>
@@ -456,6 +424,7 @@
       <div class="task-header">Nhiệm vụ 5 — Sửa tool giải mã SEI</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tìm SEI NAL, lấy payload loại <code>user_data_unregistered</code>, sau đó thử XOR để tìm plaintext.</p>
+        <p>File <code>tools/sei_probe.py</code> là script cần sửa trong nhiệm vụ này. Script dùng helper <code>tools/rbsp.py</code> để xử lý dữ liệu NAL; sinh viên không cần sửa file helper. Kết quả giải mã được lưu vào <code>report/sei_decode.txt</code>.</p>
         <p>Mở file <code>tools/sei_probe.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/sei_probe.py</span></pre>
         <p>Cần sửa các phần sau:</p>
@@ -488,6 +457,7 @@
       <div class="task-header">Nhiệm vụ 6 — Sửa tool tách thông điệp trong VCL slice</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tách bit được giấu ở phần byte 0 cuối payload của các VCL NAL.</p>
+        <p>File <code>tools/vcl_extract.py</code> là extractor cho phần VCL slice. Khác với nhiệm vụ SEI, dữ liệu ở đây nằm trong NAL chứa dữ liệu hình ảnh đã mã hóa. Output cuối được ghi vào <code>report/vcl_message.txt</code>.</p>
         <p>Mở file <code>tools/vcl_extract.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/vcl_extract.py</span></pre>
         <p>Cần sửa các phần sau:</p>
