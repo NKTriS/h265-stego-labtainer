@@ -372,15 +372,6 @@
         <pre><span class="cmd">curl -v http://evidence-server:8080/case/cctv.hevc -o cctv.hevc &gt; curl.stdout 2&gt;&amp;1</span>
 <span class="cmd">cat curl.stdout</span>
 <span class="cmd">ls -lh cctv.hevc</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File dùng:</strong> URL trên <code>evidence-server</code> là nơi chứa video chứng cứ.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>-v</code> ghi log kết nối HTTP; <code>-o cctv.hevc</code> đặt tên file tải về.</li>
-            <li><strong>File sinh ra:</strong> <code>cctv.hevc</code> là video để phân tích; <code>curl.stdout</code> lưu log tải file.</li>
-            <li><strong>Output cần chú ý:</strong> dòng kết nối tới <code>evidence-server</code> và phản hồi HTTP thành công.</li>
-          </ul>
-        </div>
         <p>Trong <code>curl.stdout</code>, cần thấy kết nối tới <code>evidence-server</code> và phản hồi HTTP thành công. File tải về tên là <code>cctv.hevc</code>.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>curl.stdout</code> có chuỗi <code>evidence-server</code>.
@@ -397,15 +388,6 @@
         <pre><span class="cmd">file cctv.hevc</span>
 <span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 cctv.hevc &gt; ffprobe.stdout</span>
 <span class="cmd">cat ffprobe.stdout</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File dùng:</strong> <code>cctv.hevc</code> vừa tải ở nhiệm vụ 1.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>file</code> nhận diện loại file; <code>ffprobe</code> đọc stream video; <code>-show_entries</code> chỉ in các trường cần thiết.</li>
-            <li><strong>File sinh ra:</strong> <code>ffprobe.stdout</code> lưu thông tin codec, kích thước và frame rate.</li>
-            <li><strong>Output cần chú ý:</strong> <code>codec_name=hevc</code>.</li>
-          </ul>
-        </div>
         <p>Output cần có <code>codec_name=hevc</code>. Nếu không có dòng này, các bước phân tích bitstream phía sau không có ý nghĩa.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>ffprobe.stdout</code> có <code>codec_name=hevc</code>.
@@ -428,10 +410,9 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Lệnh cần chú ý:</strong> <code>tcpdump -i eth0</code> bắt gói trên card mạng của analyst; <code>-w transfer.pcap</code> ghi gói ra file; <code>host evidence-server</code> chỉ bắt traffic liên quan server chứng cứ.</li>
-            <li><strong>Tham số dễ nhầm:</strong> <code>-Z root</code> giúp tránh lỗi quyền ghi file trong container; dấu <code>&amp;</code> cho tcpdump chạy nền.</li>
-            <li><strong>File sinh ra:</strong> <code>transfer.pcap</code> lưu gói mạng, <code>tcpdump.stdout</code> lưu log chạy tcpdump.</li>
-            <li><strong>Output cần chú ý:</strong> <code>tcpdump.stdout</code> có thông tin tcpdump đã chạy.</li>
+            <li><code>-w transfer.pcap</code> ghi gói mạng ra file pcap để làm bằng chứng.</li>
+            <li><code>-Z root</code> giúp tránh lỗi quyền ghi file trong container; dấu <code>&amp;</code> cho tcpdump chạy nền để tiếp tục gõ lệnh tải file.</li>
+            <li><code>host evidence-server</code> chỉ bắt traffic liên quan máy chủ chứng cứ.</li>
           </ul>
         </div>
         <p>Nếu chạy <code>tcpdump</code> ở foreground, dừng bằng <code>Ctrl+C</code>. Tùy chọn <code>-Z root</code> giúp tránh lỗi quyền ghi file trong container.</p>
@@ -454,10 +435,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Lệnh cần chú ý:</strong> <code>strings | grep HEVC</code> tìm chuỗi ASCII rõ ràng; <code>tools/nal_overview.py</code> kiểm tra nhanh cấu trúc NAL.</li>
-            <li><strong>File sinh ra:</strong> <code>nal_overview.py.stdout</code> lưu kết quả kiểm tra NAL.</li>
-            <li><strong>Output cần chú ý:</strong> <code>SEI_SUSPICIOUS=NO</code>, nghĩa là không có dấu SEI rõ như lab 1.</li>
-            <li><strong>Ý nghĩa:</strong> sau dòng này, hướng điều tra chuyển sang motion vector.</li>
+            <li><code>SEI_SUSPICIOUS=NO</code> là dòng quan trọng: video không có dấu SEI rõ như lab 1.</li>
+            <li>Sau kết quả này, hướng điều tra chuyển sang motion vector.</li>
           </ul>
         </div>
         <p>Kết quả <code>SEI_SUSPICIOUS=NO</code> nghĩa là không có dấu hiệu SEI rõ ràng. Vì vậy cần chuyển hướng sang phân tích motion vector.</p>
@@ -478,10 +457,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Script dùng:</strong> <code>tools/mv_dump.py</code> chỉ in mẫu motion vector, không cần sửa.</li>
-            <li><strong>File sinh ra:</strong> <code>mv_dump.py.stdout</code> lưu các record motion vector.</li>
-            <li><strong>Dòng output cần chú ý:</strong> <code>mv_x</code> là cột dùng để giấu bit; <code>frame</code> và <code>block</code> chỉ cho biết vị trí mẫu.</li>
-            <li><strong>Output tổng hợp:</strong> <code>MV_RECORDS=200</code>.</li>
+            <li><code>tools/mv_dump.py</code> chỉ in mẫu motion vector, không cần sửa.</li>
+            <li>Cột cần chú ý là <code>mv_x</code>; chẵn/lẻ của cột này sẽ được dùng để tạo bit.</li>
           </ul>
         </div>
         <p>Output gồm nhiều dòng dạng <code>frame=... block=... mv_x=... mv_y=...</code>. Quan sát tính chẵn/lẻ của cột <code>mv_x</code>. Cuối file cần có <code>MV_RECORDS=200</code>.</p>
@@ -501,10 +478,9 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Script cần sửa:</strong> <code>tools/mv_extract.py</code>.</li>
-            <li><strong>Script không cần sửa:</strong> <code>tools/mv_common.py</code> và <code>tools/mv_dump.py</code>.</li>
-            <li><strong>Dòng code cần hiểu:</strong> lấy bit bằng chẵn/lẻ của <code>mv_x</code>, sau đó ghép bit vào byte bằng dịch trái.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>nano</code> dùng để sửa file; lưu bằng <code>Ctrl + O</code>, <code>Enter</code>, thoát bằng <code>Ctrl + X</code>.</li>
+            <li><strong>Cần sửa:</strong> <code>tools/mv_extract.py</code>.</li>
+            <li><strong>Không cần sửa:</strong> <code>tools/mv_common.py</code> và <code>tools/mv_dump.py</code>.</li>
+            <li>Cần hiểu quy tắc: lấy bit bằng chẵn/lẻ của <code>mv_x</code>, rồi ghép bit vào byte bằng dịch trái.</li>
           </ul>
         </div>
         <p>Trong file có hai phần cần sửa:</p>
@@ -523,10 +499,7 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>File dùng:</strong> <code>cctv.hevc</code>.</li>
-            <li><strong>File sinh ra:</strong> <code>mv_extract.py.stdout</code> lưu thông điệp trích xuất.</li>
-            <li><strong>Output cần chú ý:</strong> <code>MV_MESSAGE=HEVC{motion_leak_in_cctv}</code>.</li>
-            <li><strong>Nếu sai:</strong> thông điệp có thể rỗng, sai ký tự hoặc không có dòng <code>MV_MESSAGE</code>.</li>
+            <li>Dòng cần chú ý là <code>MV_MESSAGE=HEVC{motion_leak_in_cctv}</code>. Nếu sửa sai, dòng này thường không xuất hiện hoặc nội dung bị sai.</li>
           </ul>
         </div>
         <div class="box box-success">
@@ -544,15 +517,6 @@
         <pre><span class="cmd">curl http://evidence-server:8080/logs/cctv_export.log -o cctv_export.log</span>
 <span class="cmd">grep uploaded cctv_export.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File dùng:</strong> <code>cctv_export.log</code> là log audit lấy từ server.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>grep uploaded</code> chỉ giữ dòng có hành động upload.</li>
-            <li><strong>File sinh ra:</strong> <code>grep.stdout</code> lưu dòng log quan trọng.</li>
-            <li><strong>Output cần chú ý:</strong> user <code>intern01</code>.</li>
-          </ul>
-        </div>
         <p>Dòng log cần tìm có user <code>intern01</code>. Đây là tài khoản đáng ngờ trong kịch bản.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>intern01</code>.
@@ -569,14 +533,6 @@
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>
         <pre><span class="cmd">intern01 HEVC{motion_leak_in_cctv} MVX_LSB</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File sinh ra:</strong> <code>answer.txt</code> là kết luận cuối bài.</li>
-            <li><strong>Nội dung cần có:</strong> tài khoản nghi vấn, thông điệp khôi phục và tên kỹ thuật.</li>
-            <li><strong>Ý nghĩa:</strong> file này chứng minh sinh viên đã tổng hợp kết quả từ video, log và extractor.</li>
-          </ul>
-        </div>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>answer.txt</code> có đủ user, thông điệp và kỹ thuật.
         </div>
