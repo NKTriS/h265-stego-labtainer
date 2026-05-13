@@ -120,7 +120,14 @@ ls -lh suspect_frame.jpg
 Nếu môi trường có hỗ trợ giao diện video, có thể xem bằng:
 
 ```bash
-ffplay evidence/warehouse-suspect.hevc
+ffplay -loglevel error -x 640 -y 360 evidence/warehouse-suspect.hevc
+```
+
+Lab cũng cấu hình sẵn alias trong container:
+
+```bash
+play-suspect
+play-clean
 ```
 
 ### Task 3 - So sánh NAL unit giữa bản sạch và bản nghi vấn
