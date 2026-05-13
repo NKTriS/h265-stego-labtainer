@@ -13,7 +13,28 @@ rm -rf ~/labtainer/trunk/labs/h265-filler-nal-stego
 rm -rf ~/labtainer_xfer/h265-filler-nal-stego
 ```
 
-## Cài lab
+## Cài lab bằng imodule
+
+```bash
+cd ~/labtainer/labtainer-student
+imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-filler-nal-stego.tar.gz
+labtainer h265-filler-nal-stego
+```
+
+Labtainer sẽ dùng image:
+
+```text
+nktris/h265-filler-nal-stego.workstation.student:latest
+```
+
+Nếu máy không tự kéo image từ DockerHub, chạy thêm:
+
+```bash
+docker pull nktris/h265-filler-nal-stego.workstation.student:latest
+labtainer h265-filler-nal-stego
+```
+
+## Cài lab bằng curl nếu imodule lỗi DNS
 
 ```bash
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-filler-nal-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
