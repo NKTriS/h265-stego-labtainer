@@ -29,6 +29,8 @@ labtainer h265-cctv-motion-leak
 
 Điều tra giấu tin trong H.265 bằng Filler Data NAL. Lab có hai video HEVC thật: bản sạch và bản nghi vấn. Sinh viên có thể so sánh hash, dùng `ffprobe`, xuất frame bằng `ffmpeg`, quét NAL và sửa extractor nhỏ để khôi phục thông điệp.
 
+Hướng dẫn đầy đủ: [HUONG_DAN_H265_FILLER_NAL_STEGO.md](HUONG_DAN_H265_FILLER_NAL_STEGO.md)
+
 ```bash
 cd ~/labtainer/labtainer-student
 imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-filler-nal-stego.tar.gz
