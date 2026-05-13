@@ -372,10 +372,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>File dùng:</strong> <code>warehouse-clean.hevc</code> là video sạch; <code>warehouse-suspect.hevc</code> là video nghi vấn.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>sha256sum</code> tạo hash SHA-256 để so sánh hai file ở mức nhị phân.</li>
-            <li><strong>File sinh ra:</strong> <code>sha256sum.stdout</code> lưu hash của hai video.</li>
-            <li><strong>Output cần chú ý:</strong> hai hash khác nhau nghĩa là hai file không giống nhau.</li>
+            <li><code>sha256sum</code> tạo dấu vân tay SHA-256 cho từng file. Nếu hai hash khác nhau, hai video khác nhau ở mức nhị phân.</li>
+            <li><code>sha256sum.stdout</code> lưu kết quả để đối chiếu lại trong quá trình điều tra.</li>
           </ul>
         </div>
         <p>Nếu hai mã SHA-256 khác nhau, sinh viên cần tiếp tục phân tích để xem khác nhau ở phần dữ liệu video hay ở phần cấu trúc phụ của bitstream.</p>
@@ -395,16 +393,6 @@
 <span class="cmd">cat ffprobe.stdout</span></pre>
         <p>Nếu muốn xem video:</p>
         <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-suspect.hevc</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File dùng:</strong> <code>evidence/warehouse-suspect.hevc</code>.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>ffprobe</code> đọc metadata video; <code>-show_entries</code> chỉ lấy codec, kích thước và frame rate.</li>
-            <li><strong>File sinh ra:</strong> <code>ffprobe.stdout</code> lưu thông tin stream.</li>
-            <li><strong>Lệnh xem thử:</strong> <code>ffplay</code> chỉ dùng để quan sát video, không phải bước phân tích chính.</li>
-            <li><strong>Output cần chú ý:</strong> <code>codec_name=hevc</code>.</li>
-          </ul>
-        </div>
         <p>Việc video vẫn mở được giúp sinh viên hiểu đặc điểm của steganography: dữ liệu ẩn có thể tồn tại trong file mà người xem bình thường không nhận ra.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>ffprobe.stdout</code> có <code>codec_name=hevc</code>.
@@ -423,10 +411,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Script dùng:</strong> <code>tools/nal_compare.py</code>, không cần sửa.</li>
-            <li><strong>File dùng:</strong> video sạch và video nghi vấn.</li>
-            <li><strong>File sinh ra:</strong> <code>nal_compare.py.stdout</code> lưu kết quả so sánh NAL.</li>
-            <li><strong>Output cần chú ý:</strong> <code>SUSPECT_FILLER=248</code>, cho thấy bản nghi vấn có Filler NAL bất thường.</li>
+            <li><code>tools/nal_compare.py</code> chỉ dùng để so sánh NAL, không cần sửa.</li>
+            <li><code>SUSPECT_FILLER=248</code> là dòng quan trọng: bản nghi vấn có 248 Filler NAL, đây là điểm bất thường cần điều tra tiếp.</li>
           </ul>
         </div>
         <p>Nếu bản nghi vấn có nhiều Filler NAL bất thường, đây là hướng điều tra chính. Filler NAL thường không ảnh hưởng nội dung hình ảnh nên dễ bị lợi dụng làm kênh giấu tin.</p>
@@ -447,10 +433,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Script dùng:</strong> <code>tools/filler_dump.py</code>, không cần sửa.</li>
-            <li><strong>File dùng:</strong> <code>warehouse-suspect.hevc</code>.</li>
-            <li><strong>File sinh ra:</strong> <code>filler_dump.py.stdout</code> lưu danh sách Filler NAL.</li>
-            <li><strong>Dòng output cần chú ý:</strong> số byte <code>0xff</code> trong từng Filler NAL; chẵn/lẻ của số này là dữ liệu ẩn.</li>
+            <li><code>tools/filler_dump.py</code> chỉ in dữ liệu thô của Filler NAL, không cần sửa.</li>
+            <li>Dòng cần chú ý là số byte <code>0xff</code> trong từng Filler NAL. Chẵn/lẻ của số này chính là bit ẩn.</li>
           </ul>
         </div>
         <p>Quan sát cột số lượng byte filler. Quy luật của bài là số byte <code>0xff</code> chẵn biểu diễn bit 0, số byte <code>0xff</code> lẻ biểu diễn bit 1.</p>
@@ -470,10 +454,9 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>Script cần sửa:</strong> <code>tools/filler_extract.py</code>.</li>
-            <li><strong>Script không cần sửa:</strong> <code>tools/hevc_filler_common.py</code>, đây là helper đọc NAL/filler.</li>
-            <li><strong>Dòng code cần hiểu:</strong> <code>ff_count % 2</code> lấy chẵn/lẻ để tạo bit; <code>bits_to_text(bits)</code> đổi bit thành chuỗi.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>nano</code> dùng để sửa script trong terminal.</li>
+            <li><strong>Cần sửa:</strong> <code>tools/filler_extract.py</code>.</li>
+            <li><strong>Không cần sửa:</strong> <code>tools/hevc_filler_common.py</code>, file này chỉ hỗ trợ đọc NAL/filler.</li>
+            <li><code>ff_count % 2</code> lấy chẵn/lẻ để tạo bit; <code>bits_to_text(bits)</code> ghép các bit thành chuỗi.</li>
           </ul>
         </div>
         <p>Sửa hai dòng TODO thành:</p>
@@ -485,10 +468,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>File dùng:</strong> <code>warehouse-suspect.hevc</code>.</li>
-            <li><strong>File sinh ra:</strong> <code>filler_extract.py.stdout</code> lưu thông điệp khôi phục.</li>
-            <li><strong>Output cần chú ý:</strong> <code>FILLER_MESSAGE=HEVC{filler_nal_length_channel}</code>.</li>
-            <li><strong>Nếu sai:</strong> chuỗi thường rỗng, sai ký tự hoặc không có dòng <code>FILLER_MESSAGE</code>.</li>
+            <li><code>filler_extract.py.stdout</code> lưu thông điệp khôi phục.</li>
+            <li>Dòng cần chú ý là <code>FILLER_MESSAGE=HEVC{filler_nal_length_channel}</code>. Nếu sửa code sai, dòng này thường không xuất hiện hoặc nội dung bị sai.</li>
           </ul>
         </div>
         <p>Dòng <code>bit = rec["ff_count"] % 2</code> lấy phần dư khi chia cho 2: chẵn thành 0, lẻ thành 1. Hàm <code>bits_to_text</code> ghép từng nhóm 8 bit thành một ký tự.</p>
@@ -510,10 +491,8 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><strong>File dùng:</strong> <code>evidence/export_audit.log</code> là log audit của ca điều tra.</li>
-            <li><strong>Lệnh cần chú ý:</strong> <code>grep uploaded</code> lọc các dòng có hành động upload.</li>
-            <li><strong>File sinh ra:</strong> <code>grep.stdout</code> lưu dòng log quan trọng.</li>
-            <li><strong>Output cần chú ý:</strong> user <code>ops-video12</code>.</li>
+            <li><code>grep uploaded</code> lọc dòng log có hành động upload.</li>
+            <li>Dòng cần chú ý là user <code>ops-video12</code>, đây là tài khoản liên quan tới video nghi vấn.</li>
           </ul>
         </div>
         <p>Đây là phần điều tra bối cảnh: sau khi đã biết video có kênh giấu tin, sinh viên cần xác định ai đã thao tác với file đó.</p>
@@ -532,14 +511,6 @@
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>
         <pre><span class="cmd">ops-video12 HEVC{filler_nal_length_channel} FILLER_NAL_LENGTH</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><strong>File sinh ra:</strong> <code>answer.txt</code> là kết luận cuối bài.</li>
-            <li><strong>Nội dung cần có:</strong> tài khoản nghi vấn, thông điệp khôi phục và kỹ thuật giấu tin.</li>
-            <li><strong>Ý nghĩa:</strong> liên kết kết quả phân tích file với log audit của ca điều tra.</li>
-          </ul>
-        </div>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>answer.txt</code> có đủ user, thông điệp và kỹ thuật.
         </div>
