@@ -6,6 +6,8 @@ Repo này chứa các bài lab Labtainer về giấu tin trong video H.265/HEVC.
 
 Phân tích giấu tin trong SEI và VCL slice.
 
+Hướng dẫn HTML: [HUONG_DAN_H265_STEGO.html](HUONG_DAN_H265_STEGO.html)
+
 ```bash
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
 docker pull nktris/h265-stego.workstation.student:latest
