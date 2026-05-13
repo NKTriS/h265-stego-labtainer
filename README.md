@@ -19,6 +19,8 @@ labtainer h265-stego
 
 Điều tra rò rỉ CCTV H.265 qua kênh motion-vector LSB. Lab có 2 container: `analyst` và `evidence-server`.
 
+Hướng dẫn HTML: [HUONG_DAN_H265_CCTV_MOTION_LEAK.html](HUONG_DAN_H265_CCTV_MOTION_LEAK.html)
+
 ```bash
 curl -L https://raw.githubusercontent.com/NKTriS/h265-stego-labtainer/main/h265-cctv-motion-leak.tar.gz | tar -xz -C ~/labtainer/trunk/labs/
 docker pull nktris/h265-cctv-motion-leak.analyst.student:latest
