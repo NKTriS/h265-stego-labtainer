@@ -369,13 +369,6 @@
         <pre><span class="cmd">ls evidence</span>
 <span class="cmd">sha256sum evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; sha256sum.stdout</span>
 <span class="cmd">cat sha256sum.stdout</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><code>sha256sum</code> tạo dấu vân tay SHA-256 cho từng file. Nếu hai hash khác nhau, hai video khác nhau ở mức nhị phân.</li>
-            <li><code>sha256sum.stdout</code> lưu kết quả để đối chiếu lại trong quá trình điều tra.</li>
-          </ul>
-        </div>
         <p>Nếu hai mã SHA-256 khác nhau, sinh viên cần tiếp tục phân tích để xem khác nhau ở phần dữ liệu video hay ở phần cấu trúc phụ của bitstream.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>sha256sum.stdout</code> có tên <code>warehouse-suspect.hevc</code>.
@@ -488,14 +481,7 @@
         <pre><span class="cmd">cat evidence/export_audit.log</span>
 <span class="cmd">grep uploaded evidence/export_audit.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
-        <div class="box box-info">
-          <strong>Giải thích cần biết:</strong><br />
-          <ul>
-            <li><code>grep uploaded</code> lọc dòng log có hành động upload.</li>
-            <li>Dòng cần chú ý là user <code>ops-video12</code>, đây là tài khoản liên quan tới video nghi vấn.</li>
-          </ul>
-        </div>
-        <p>Đây là phần điều tra bối cảnh: sau khi đã biết video có kênh giấu tin, sinh viên cần xác định ai đã thao tác với file đó.</p>
+        <p>Dòng cần chú ý là user <code>ops-video12</code>; đây là tài khoản liên quan tới video nghi vấn.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>ops-video12</code>.
         </div>
