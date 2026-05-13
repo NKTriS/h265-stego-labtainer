@@ -493,54 +493,6 @@
     <p>Trên terminal <code>student@ubuntu</code>, chạy:</p>
     <pre><span class="cmd">checkwork h265-cctv-motion-leak</span></pre>
 
-    <table>
-      <tr>
-        <th>Mục chấm</th>
-        <th>File/output được kiểm tra</th>
-        <th>Cần có</th>
-      </tr>
-      <tr>
-        <td><code>cw1</code></td>
-        <td><code>curl.stdout</code></td>
-        <td><code>evidence-server</code></td>
-      </tr>
-      <tr>
-        <td><code>cw2</code></td>
-        <td><code>ffprobe.stdout</code></td>
-        <td><code>codec_name=hevc</code></td>
-      </tr>
-      <tr>
-        <td><code>cw3</code></td>
-        <td><code>tcpdump.stdout</code></td>
-        <td><code>tcpdump</code></td>
-      </tr>
-      <tr>
-        <td><code>cw4</code></td>
-        <td><code>nal_overview.py.stdout</code></td>
-        <td><code>SEI_SUSPICIOUS=NO</code></td>
-      </tr>
-      <tr>
-        <td><code>cw5</code></td>
-        <td><code>mv_dump.py.stdout</code></td>
-        <td><code>MV_RECORDS=200</code></td>
-      </tr>
-      <tr>
-        <td><code>cw6</code></td>
-        <td><code>mv_extract.py.stdout</code></td>
-        <td><code>MV_MESSAGE=HEVC{motion_leak_in_cctv}</code></td>
-      </tr>
-      <tr>
-        <td><code>cw7</code></td>
-        <td><code>grep.stdout</code></td>
-        <td><code>intern01</code></td>
-      </tr>
-      <tr>
-        <td><code>cw8</code></td>
-        <td><code>answer.txt</code></td>
-        <td><code>intern01</code>, <code>HEVC{motion_leak_in_cctv}</code>, <code>MVX_LSB</code></td>
-      </tr>
-    </table>
-
     <div class="box box-success">
       <strong>Kết quả kỳ vọng:</strong> Các mục <code>cw1</code> đến <code>cw8</code> đều hiển thị <code>Y</code>.
     </div>
