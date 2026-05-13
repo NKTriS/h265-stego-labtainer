@@ -10,6 +10,7 @@ stoplab h265-filler-nal-stego 2>/dev/null || true
 docker rm -f h265-filler-nal-stego.workstation.student h265-filler-nal-stego-igrader 2>/dev/null || true
 docker rmi -f nktris/h265-filler-nal-stego.workstation.student:latest 2>/dev/null || true
 rm -rf ~/labtainer/trunk/labs/h265-filler-nal-stego
+rm -rf ~/labtainer/trunk/scripts/labtainer-student/.tmp/h265-filler-nal-stego
 rm -rf ~/labtainer_xfer/h265-filler-nal-stego
 ```
 
