@@ -368,6 +368,10 @@
         <p>Dùng <code>ffprobe</code> để lấy thông tin codec, kích thước và frame rate:</p>
         <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/evidence.hevc &gt; report/video_info.txt</span>
 <span class="cmd">cat report/video_info.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>ffprobe</code> đọc metadata của file video. <code>-v error</code> chỉ hiện lỗi, tránh output dài. <code>-select_streams v:0</code> chọn luồng video đầu tiên. <code>-show_entries</code> chỉ lấy các trường cần xem. Dấu <code>&gt;</code> ghi kết quả vào <code>report/video_info.txt</code>. Lệnh <code>cat</code> dùng để mở lại file kết quả trên terminal.
+        </div>
         <p>Khi xem file kết quả, cần chú ý dòng <code>codec_name=hevc</code>. Đây là dấu hiệu cho thấy file được giải mã như video H.265/HEVC.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/video_info.txt</code> có <code>codec_name=hevc</code>.
@@ -383,6 +387,10 @@
         <p>Dùng <code>xxd</code> để xem 96 byte đầu file:</p>
         <pre><span class="cmd">xxd -l 96 evidence/evidence.hevc &gt; report/header_hex.txt</span>
 <span class="cmd">cat report/header_hex.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>xxd</code> chuyển dữ liệu nhị phân sang dạng hex để đọc được bằng mắt. <code>-l 96</code> nghĩa là chỉ lấy 96 byte đầu, đủ để thấy start code và header ban đầu. Kết quả được lưu vào <code>report/header_hex.txt</code> để sinh viên có bằng chứng về định dạng Annex B.
+        </div>
         <p>Dòng đầu cần bắt đầu bằng <code>00000000: 0000 0001</code>. Nếu thấy giá trị này, sinh viên có thể hiểu file đang dùng start code Annex B.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/header_hex.txt</code> có <code>00000000: 0000 0001</code>.
@@ -398,6 +406,10 @@
         <p>Chạy tool quét bố cục NAL:</p>
         <pre><span class="cmd">python3 tools/nal_scan.py evidence/evidence.hevc &gt; report/nal_scan.txt</span>
 <span class="cmd">cat report/nal_scan.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>python3 tools/nal_scan.py</code> chạy script quét NAL. Tham số <code>evidence/evidence.hevc</code> là file đầu vào. Output được chuyển vào <code>report/nal_scan.txt</code> để lưu bảng thống kê. Khi dùng <code>cat</code>, sinh viên sẽ thấy danh sách NAL và dòng tổng hợp cuối file.
+        </div>
         <p>Cuối output sẽ có dòng tổng hợp. Trong bài này dòng cần quan sát là <code>NAL_SUMMARY=171:5:5:5:6:150</code>, nghĩa là file có 171 NAL, trong đó có 150 NAL loại VCL.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/nal_scan.txt</code> có <code>NAL_SUMMARY=171:5:5:5:6:150</code>.
@@ -413,6 +425,10 @@
         <p>Dùng <code>strings</code> kết hợp <code>grep</code> để tìm chuỗi gợi ý:</p>
         <pre><span class="cmd">strings evidence/evidence.hevc | grep HE265LAB &gt; report/sei_hint.txt</span>
 <span class="cmd">cat report/sei_hint.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>strings</code> lấy các chuỗi ASCII có thể đọc được trong file nhị phân. Dấu <code>|</code> đưa output của <code>strings</code> sang <code>grep</code>. <code>grep HE265LAB</code> chỉ giữ các dòng có nhãn nghi vấn. File <code>report/sei_hint.txt</code> là bằng chứng ban đầu rằng có dữ liệu dạng SEI/metadata đáng kiểm tra.
+        </div>
         <p>Nếu thấy <code>HE265LABSTEGO001</code>, đó là dấu hiệu cho biết có SEI user data cần phân tích sâu hơn.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>report/sei_hint.txt</code> có <code>HE265LABSTEGO001</code>.
@@ -427,6 +443,10 @@
         <p>File <code>tools/sei_probe.py</code> là script cần sửa trong nhiệm vụ này. Script dùng helper <code>tools/rbsp.py</code> để xử lý dữ liệu NAL; sinh viên không cần sửa file helper. Kết quả giải mã được lưu vào <code>report/sei_decode.txt</code>.</p>
         <p>Mở file <code>tools/sei_probe.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/sei_probe.py</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích file:</strong><br />
+          <code>nano</code> mở file để sửa trực tiếp trong terminal. Trong <code>sei_probe.py</code>, các dòng <code>TODO</code> đang cố tình để thiếu để sinh viên tự hoàn thiện logic: lọc đúng NAL loại SEI, chọn đúng payload type và giải XOR. Sau khi sửa, lưu bằng <code>Ctrl + O</code>, nhấn <code>Enter</code>, rồi thoát bằng <code>Ctrl + X</code>.
+        </div>
         <p>Cần sửa các phần sau:</p>
         <div class="box box-info">
           <strong>TODO Task 5.1:</strong> chỉ xử lý SEI NAL type 39 hoặc 40.<br />
@@ -447,6 +467,10 @@
         <p>Sau khi sửa, chạy tool:</p>
         <pre><span class="cmd">python3 tools/sei_probe.py evidence/evidence.hevc &gt; report/sei_decode.txt</span>
 <span class="cmd">cat report/sei_decode.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          Script nhận <code>evidence/evidence.hevc</code> làm đầu vào, tự tìm SEI NAL và thử giải mã payload. File <code>report/sei_decode.txt</code> lưu thông điệp tìm được để sinh viên có thể đối chiếu lại sau. Nếu sửa code sai, file này thường rỗng hoặc không có dòng <code>SEI_MESSAGE</code>.
+        </div>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>SEI_MESSAGE=HEVC-LAB{metadata_is_not_pixels}</code>.
         </div>
@@ -460,6 +484,10 @@
         <p>File <code>tools/vcl_extract.py</code> là extractor cho phần VCL slice. Khác với nhiệm vụ SEI, dữ liệu ở đây nằm trong NAL chứa dữ liệu hình ảnh đã mã hóa. Output cuối được ghi vào <code>report/vcl_message.txt</code>.</p>
         <p>Mở file <code>tools/vcl_extract.py</code> và hoàn thành các dòng <code>TODO</code>:</p>
         <pre><span class="cmd">nano tools/vcl_extract.py</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích file:</strong><br />
+          <code>vcl_extract.py</code> xử lý các NAL chứa dữ liệu hình ảnh đã mã hóa. Bài lab không yêu cầu viết parser HEVC từ đầu; sinh viên chỉ sửa phần logic lấy bit: bỏ qua NAL không phải VCL, đếm byte <code>0x00</code> cuối payload, rồi ghép bit thành byte.
+        </div>
         <p>Cần sửa các phần sau:</p>
         <div class="box box-info">
           <strong>TODO Task 6.1:</strong> chỉ lấy NAL loại VCL. Trong helper <code>nal_scan.py</code>, mỗi NAL có thuộc tính <code>is_vcl</code>.
@@ -477,6 +505,10 @@
         <p>Lưu file, sau đó chạy tool:</p>
         <pre><span class="cmd">python3 tools/vcl_extract.py evidence/evidence.hevc &gt; report/vcl_message.txt</span>
 <span class="cmd">cat report/vcl_message.txt</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          Lệnh chạy extractor trên video nghi vấn và lưu kết quả vào <code>report/vcl_message.txt</code>. File này là kết quả của kênh giấu tin thứ hai, khác với <code>report/sei_decode.txt</code> ở nhiệm vụ trước. Dùng <code>cat</code> để kiểm tra thông điệp sau khi script chạy xong.
+        </div>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>SLICE_MESSAGE=SLICE:qpel_path</code>.
         </div>

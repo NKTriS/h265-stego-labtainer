@@ -368,6 +368,10 @@
         <pre><span class="cmd">ls evidence</span>
 <span class="cmd">sha256sum evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; sha256sum.stdout</span>
 <span class="cmd">cat sha256sum.stdout</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>ls evidence</code> liệt kê các file chứng cứ. <code>sha256sum</code> tạo mã băm SHA-256 cho từng file; nếu hai hash khác nhau thì hai file không giống nhau ở mức nhị phân. Dấu <code>&gt;</code> lưu kết quả vào <code>sha256sum.stdout</code>, còn <code>cat</code> dùng để xem lại file kết quả.
+        </div>
         <p>Nếu hai mã SHA-256 khác nhau, sinh viên cần tiếp tục phân tích để xem khác nhau ở phần dữ liệu video hay ở phần cấu trúc phụ của bitstream.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>sha256sum.stdout</code> có tên <code>warehouse-suspect.hevc</code>.
@@ -385,6 +389,10 @@
 <span class="cmd">cat ffprobe.stdout</span></pre>
         <p>Nếu muốn xem video:</p>
         <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-suspect.hevc</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>ffprobe</code> kiểm tra thông tin kỹ thuật của video. <code>-v error</code> làm output gọn, <code>-select_streams v:0</code> chọn stream video đầu tiên, <code>-show_entries</code> chỉ lấy codec, kích thước và frame rate. <code>ffplay</code> mở video để quan sát; <code>-x 640 -y 360</code> đặt kích thước cửa sổ phát, <code>-loglevel error</code> chỉ hiện lỗi quan trọng.
+        </div>
         <p>Việc video vẫn mở được giúp sinh viên hiểu đặc điểm của steganography: dữ liệu ẩn có thể tồn tại trong file mà người xem bình thường không nhận ra.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>ffprobe.stdout</code> có <code>codec_name=hevc</code>.
@@ -400,6 +408,10 @@
         <p>Chạy tool so sánh NAL giữa bản sạch và bản nghi vấn:</p>
         <pre><span class="cmd">python3 tools/nal_compare.py evidence/warehouse-clean.hevc evidence/warehouse-suspect.hevc &gt; nal_compare.py.stdout</span>
 <span class="cmd">cat nal_compare.py.stdout</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>tools/nal_compare.py</code> nhận hai tham số đầu vào: video sạch và video nghi vấn. Script so sánh số lượng NAL theo từng loại, đặc biệt là Filler NAL. File <code>nal_compare.py.stdout</code> lưu kết quả để chứng minh bản nghi vấn có nhiều Filler NAL hơn bản sạch.
+        </div>
         <p>Nếu bản nghi vấn có nhiều Filler NAL bất thường, đây là hướng điều tra chính. Filler NAL thường không ảnh hưởng nội dung hình ảnh nên dễ bị lợi dụng làm kênh giấu tin.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>SUSPECT_FILLER=248</code>.
@@ -415,6 +427,10 @@
         <p>Dump các Filler NAL trong file nghi vấn:</p>
         <pre><span class="cmd">python3 tools/filler_dump.py evidence/warehouse-suspect.hevc &gt; filler_dump.py.stdout</span>
 <span class="cmd">cat filler_dump.py.stdout</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>filler_dump.py</code> đọc file nghi vấn và chỉ in thông tin các Filler NAL. Mỗi record cho biết thứ tự NAL và số byte <code>0xff</code>. Output <code>filler_dump.py.stdout</code> là bước trung gian để sinh viên thấy dữ liệu thô trước khi giải mã.
+        </div>
         <p>Quan sát cột số lượng byte filler. Quy luật của bài là số byte <code>0xff</code> chẵn biểu diễn bit 0, số byte <code>0xff</code> lẻ biểu diễn bit 1.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>FILLER_RECORDS=248</code>.
@@ -429,12 +445,20 @@
         <p>File <code>tools/filler_extract.py</code> là script cần sửa. File <code>tools/hevc_filler_common.py</code> là helper đọc NAL và xử lý filler, sinh viên không cần sửa. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/filler_extract.py</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích file:</strong><br />
+          <code>filler_extract.py</code> đã có phần đọc Filler NAL và hàm đổi bit thành text. Sinh viên chỉ hoàn thành hai dòng còn thiếu: lấy bit bằng phép chia dư cho 2 và chuyển danh sách bit sang chuỗi. File helper <code>hevc_filler_common.py</code> chứa hàm đọc NAL, không cần chỉnh sửa.
+        </div>
         <p>Sửa hai dòng TODO thành:</p>
         <pre><span class="cmd">bit = rec["ff_count"] % 2</span>
 <span class="cmd">message = bits_to_text(bits)</span></pre>
         <p>Chạy extractor:</p>
         <pre><span class="cmd">python3 tools/filler_extract.py evidence/warehouse-suspect.hevc &gt; filler_extract.py.stdout</span>
 <span class="cmd">cat filler_extract.py.stdout</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          Sau khi sửa code, lệnh này chạy extractor trên video nghi vấn. Output được lưu vào <code>filler_extract.py.stdout</code>. Nếu logic đúng, file sẽ chứa <code>FILLER_MESSAGE</code>; nếu sai, chuỗi khôi phục thường bị rỗng hoặc sai định dạng.
+        </div>
         <p>Dòng <code>bit = rec["ff_count"] % 2</code> lấy phần dư khi chia cho 2: chẵn thành 0, lẻ thành 1. Hàm <code>bits_to_text</code> ghép từng nhóm 8 bit thành một ký tự.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> Output có <code>FILLER_MESSAGE=HEVC{filler_nal_length_channel}</code>.
@@ -451,6 +475,10 @@
         <pre><span class="cmd">cat evidence/export_audit.log</span>
 <span class="cmd">grep uploaded evidence/export_audit.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích lệnh:</strong><br />
+          <code>cat evidence/export_audit.log</code> xem toàn bộ log. <code>grep uploaded</code> lọc các dòng có hành động upload để tìm tài khoản liên quan. Kết quả được lưu vào <code>grep.stdout</code>, giúp phần kết luận có bằng chứng rõ ràng thay vì chỉ ghi nhớ trên màn hình.
+        </div>
         <p>Đây là phần điều tra bối cảnh: sau khi đã biết video có kênh giấu tin, sinh viên cần xác định ai đã thao tác với file đó.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>ops-video12</code>.
@@ -467,6 +495,10 @@
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Nội dung cần ghi:</p>
         <pre><span class="cmd">ops-video12 HEVC{filler_nal_length_channel} FILLER_NAL_LENGTH</span></pre>
+        <div class="box box-info">
+          <strong>Giải thích file:</strong><br />
+          <code>answer.txt</code> là kết luận tổng hợp. Nội dung gồm ba phần: tài khoản nghi vấn lấy từ log, thông điệp khôi phục bằng extractor và kỹ thuật giấu tin đã xác định. Đây là bước buộc sinh viên liên kết kết quả phân tích file với bối cảnh điều tra.
+        </div>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>answer.txt</code> có đủ user, thông điệp và kỹ thuật.
         </div>
