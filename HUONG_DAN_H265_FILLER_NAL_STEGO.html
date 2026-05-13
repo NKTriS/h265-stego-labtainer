@@ -404,7 +404,7 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><code>tools/nal_compare.py</code> chỉ dùng để so sánh NAL, không cần sửa.</li>
+            <li><code>tools/nal_compare.py</code> dùng để so sánh số lượng NAL giữa bản sạch và bản nghi vấn.</li>
             <li><code>SUSPECT_FILLER=248</code> là dòng quan trọng: bản nghi vấn có 248 Filler NAL, đây là điểm bất thường cần điều tra tiếp.</li>
           </ul>
         </div>
@@ -426,7 +426,7 @@
         <div class="box box-info">
           <strong>Giải thích cần biết:</strong><br />
           <ul>
-            <li><code>tools/filler_dump.py</code> chỉ in dữ liệu thô của Filler NAL, không cần sửa.</li>
+            <li><code>tools/filler_dump.py</code> in dữ liệu thô của Filler NAL để quan sát quy luật chẵn/lẻ.</li>
             <li>Dòng cần chú ý là số byte <code>0xff</code> trong từng Filler NAL. Chẵn/lẻ của số này chính là bit ẩn.</li>
           </ul>
         </div>
@@ -441,7 +441,7 @@
       <div class="task-header">Nhiệm vụ 5 — Sửa extractor</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> chuyển quy luật chẵn/lẻ của Filler NAL thành chuỗi bit, rồi đổi chuỗi bit đó thành thông điệp ASCII.</p>
-        <p>File <code>tools/filler_extract.py</code> là script cần sửa. File <code>tools/hevc_filler_common.py</code> là helper đọc NAL và xử lý filler, sinh viên không cần sửa. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
+        <p>File <code>tools/filler_extract.py</code> là script cần sửa. File <code>tools/hevc_filler_common.py</code> là helper đọc NAL và xử lý filler. Kết quả được ghi vào <code>filler_extract.py.stdout</code>.</p>
         <p>Mở file extractor:</p>
         <pre><span class="cmd">nano tools/filler_extract.py</span></pre>
         <div class="box box-info">
