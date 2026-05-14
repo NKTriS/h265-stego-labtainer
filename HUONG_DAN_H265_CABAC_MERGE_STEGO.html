@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hướng dẫn thực hành - H.265 CABAC Merge Stego</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 13pt;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #f4f6f9;
+      padding: 30px 20px;
+    }
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 50px 60px;
+      border: 1px solid #d0d5dd;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #003087;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header .institution {
+      font-size: 11pt;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header h1 {
+      font-size: 20pt;
+      color: #003087;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .header .subtitle {
+      font-size: 13pt;
+      color: #444;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .meta {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 10pt;
+      font-weight: bold;
+    }
+    .badge-hard { background: #fde8e8; color: #8b0000; border: 1px solid #f5a0a0; }
+    .badge-tool { background: #e6f4ea; color: #216e39; border: 1px solid #b7dfc4; }
+    h2 {
+      font-size: 14pt;
+      color: #003087;
+      border-left: 5px solid #003087;
+      padding-left: 10px;
+      margin: 32px 0 12px;
+      font-weight: bold;
+    }
+    h3 { font-size: 12.5pt; color: #1a5276; margin: 12px 0 8px; font-weight: bold; }
+    p { margin-bottom: 10px; }
+    ul, ol { margin: 8px 0 10px 24px; }
+    li { margin-bottom: 5px; }
+    code {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: "Courier New", monospace;
+      font-size: 11pt;
+      color: #b03a2e;
+    }
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: "Courier New", monospace;
+      font-size: 10.5pt;
+      overflow-x: auto;
+      margin: 10px 0 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    pre .cmd { color: #89dceb; }
+    .box {
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: 12pt;
+    }
+    .box-info { background: #e8f4fd; border-left: 5px solid #2196f3; }
+    .box-warning { background: #fff3cd; border-left: 5px solid #ffc107; }
+    .box-success { background: #e8f5e9; border-left: 5px solid #4caf50; }
+    .task-block {
+      border: 1px solid #b0c4de;
+      border-radius: 8px;
+      margin: 18px 0;
+      overflow: hidden;
+    }
+    .task-header {
+      background: #003087;
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 12.5pt;
+      font-weight: bold;
+    }
+    .task-body { padding: 14px 18px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 12pt;
+    }
+    th { background: #003087; color: #fff; padding: 10px 12px; text-align: left; }
+    td { padding: 9px 12px; border: 1px solid #d0d5dd; vertical-align: top; }
+    tr:nth-child(even) td { background: #f5f7fa; }
+    .footer {
+      margin-top: 40px;
+      border-top: 1px solid #d0d5dd;
+      padding-top: 14px;
+      text-align: center;
+      font-size: 10pt;
+      color: #777;
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { border: none; box-shadow: none; padding: 30px 40px; max-width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="institution">Học viện Công nghệ Bưu chính Viễn thông — SecLab PTIT</div>
+      <h1>HƯỚNG DẪN THỰC HÀNH</h1>
+      <div class="subtitle">H.265 CABAC Merge Index Steganography</div>
+      <div class="meta">
+        <span class="badge badge-hard">Mức độ: Khó</span>
+        <span class="badge badge-tool">Video Forensics</span>
+        <span class="badge badge-tool">HEVC / CABAC</span>
+      </div>
+    </div>
+
+    <h2>1. Giới thiệu Lab</h2>
+    <table>
+      <tr>
+        <th>Thông tin</th>
+        <th>Chi tiết</th>
+      </tr>
+      <tr>
+        <td>Tên Lab</td>
+        <td><code>h265-cabac-merge-stego</code></td>
+      </tr>
+      <tr>
+        <td>Kỹ thuật</td>
+        <td>Giấu tin bằng parity của <code>merge_idx</code> trong trace cú pháp CABAC/merge mode của H.265</td>
+      </tr>
+      <tr>
+        <td>Công cụ</td>
+        <td><code>ffprobe</code>, <code>ffmpeg</code>, <code>python3</code>, <code>grep</code>, <code>nano</code></td>
+      </tr>
+    </table>
+
+    <p>
+      Bài lab này mô phỏng một kỹ thuật giấu tin khó phát hiện trong H.265: thay vì đưa dữ liệu vào metadata,
+      SEI, Filler NAL hoặc cuối file, thông điệp được mã hóa bằng lựa chọn <code>merge_idx</code> của các block
+      inter prediction. Đây là hướng gần với phân tích codec thật hơn các kỹ thuật giấu chuỗi trực tiếp.
+    </p>
+
+    <div class="box box-warning">
+      <strong>Lưu ý phạm vi lab:</strong><br />
+      Việc sửa trực tiếp <code>merge_idx</code> trong bitstream CABAC hoàn chỉnh yêu cầu decoder/encoder instrumented.
+      Vì vậy lab cung cấp sẵn <code>merge_trace.csv</code> như dữ liệu trace cú pháp đã trích xuất từ quá trình phân tích.
+      Sinh viên sẽ thực hiện phần nhúng/tách tin trên trace này và tạo gói video stego để kiểm chứng quy trình.
+    </div>
+
+    <h3>Mục tiêu học tập</h3>
+    <ul>
+      <li>Hiểu vai trò của merge mode và <code>merge_idx</code> trong inter prediction của H.265.</li>
+      <li>Biết vì sao dữ liệu nằm trong syntax element khó phát hiện hơn dữ liệu nằm trong metadata.</li>
+      <li>Thực hiện nhúng thông điệp bằng quy tắc chẵn/lẻ của <code>merge_idx</code>.</li>
+      <li>Sửa extractor để khôi phục thông điệp từ trace stego.</li>
+      <li>Kiểm tra video H.265 vẫn mở được và viết kết luận điều tra.</li>
+    </ul>
+
+    <h2>2. Kịch bản</h2>
+    <p>
+      Một nhóm SOC nghi ngờ một video camera kho hàng bị dùng làm kênh truyền tin bí mật. Video nhìn bình thường,
+      vẫn là H.265 hợp lệ và không có chuỗi ASCII lộ rõ. Sau khi trích xuất trace cú pháp từ quá trình phân tích
+      codec, nhóm phát hiện nhiều block dùng merge mode có thể bị lợi dụng làm carrier.
+    </p>
+    <p>
+      Sinh viên đóng vai người phân tích và người dựng lại kỹ thuật tấn công: kiểm tra video, quan sát trace
+      <code>merge_idx</code>, sửa embedder để giấu thông điệp, tạo gói stego, sau đó sửa extractor để khôi phục
+      thông điệp.
+    </p>
+
+    <h2>3. Tải và khởi động Lab</h2>
+    <p>Tải lab bằng một trong hai cách sau:</p>
+    <pre><span class="cmd">imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-cabac-merge-stego.tar.gz</span></pre>
+    <p>Hoặc dùng <code>curl</code> nếu không dùng <code>imodule</code>:</p>
+    <pre><span class="cmd">curl -L https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-cabac-merge-stego.tar.gz | tar -xz -C ~/labtainer/trunk/labs/</span></pre>
+    <p>Khởi động lab:</p>
+    <pre><span class="cmd">labtainer h265-cabac-merge-stego</span></pre>
+
+    <h2>4. Kiến thức chính</h2>
+    <p>
+      Trong H.265, khi một block dùng inter prediction, encoder có thể dùng merge mode để tái sử dụng thông tin
+      chuyển động từ các block lân cận. Nếu có nhiều candidate hợp lệ, trường <code>merge_idx</code> cho biết
+      candidate nào được chọn.
+    </p>
+    <p>Quy tắc giấu tin của lab:</p>
+    <pre><span class="cmd">merge_idx chẵn -&gt; bit 0
+merge_idx lẻ   -&gt; bit 1</span></pre>
+    <p>
+      Khi các bit được ghép theo nhóm 8 bit, ta thu được chuỗi ASCII. Điểm khó của kỹ thuật này là dữ liệu không
+      nằm dưới dạng văn bản trong file mà nằm trong quyết định mã hóa của codec.
+    </p>
+
+    <h2>5. Các nhiệm vụ thực hành</h2>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 1 — Xác nhận video H.265</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> kiểm tra video nguồn là MP4 chứa stream H.265 thật.</p>
+        <p>Dùng <code>ffprobe</code> với file <code>evidence/warehouse-source.mp4</code>, lưu output vào <code>ffprobe.stdout</code>.</p>
+        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/warehouse-source.mp4 &gt; ffprobe.stdout
+cat ffprobe.stdout</span></pre>
+        <div class="box box-info">
+          Dòng cần chú ý là <code>codec_name=hevc</code>. Nếu dòng này không xuất hiện thì file không phải stream H.265 như yêu cầu.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 2 — Xuất một frame để quan sát</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> chứng minh video có thể giải mã bình thường và có hình ảnh xem được.</p>
+        <p>Xuất frame đầu tiên ra thư mục <code>work/</code>, lưu log vào <code>frame_export.stdout</code>.</p>
+        <pre><span class="cmd">mkdir -p work
+ffmpeg -y -i evidence/warehouse-source.mp4 -frames:v 1 work/source_frame.png &gt; frame_export.stdout 2&gt;&amp;1
+cat frame_export.stdout</span></pre>
+        <p>Có thể xem trực tiếp trong container nếu X11 hoạt động:</p>
+        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-source.mp4</span></pre>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 3 — Quan sát trace merge_idx</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> xem các record merge mode dùng làm carrier.</p>
+        <p>File <code>evidence/merge_trace.csv</code> là trace cú pháp đã trích xuất. Tool <code>merge_trace_dump.py</code> chỉ in mẫu record và thống kê.</p>
+        <pre><span class="cmd">python3 tools/merge_trace_dump.py evidence/merge_trace.csv &gt; merge_trace_dump.py.stdout
+cat merge_trace_dump.py.stdout</span></pre>
+        <div class="box box-info">
+          Cột quan trọng là <code>merge_idx</code>. Chẵn/lẻ của cột này sẽ được dùng để biểu diễn bit 0 hoặc bit 1.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 4 — Sửa embedder để giấu tin</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> đọc thông điệp cần giấu, chuyển thành bit và ghi vào parity của <code>merge_idx</code>.</p>
+        <p>Thông điệp nằm trong <code>evidence/message.txt</code>. Script cần sửa là <code>tools/merge_embed.py</code>.</p>
+        <pre><span class="cmd">cat evidence/message.txt
+nano tools/merge_embed.py</span></pre>
+        <div class="box box-info">
+          Cần sửa hai chỗ: tạo danh sách bit bằng <code>text_to_bits(message)</code>, rồi chọn <code>merge_idx</code> theo bit.
+        </div>
+        <p>Sau khi sửa, chạy embedder:</p>
+        <pre><span class="cmd">python3 tools/merge_embed.py evidence/merge_trace.csv evidence/message.txt work/merge_stego.csv &gt; merge_embed.py.stdout
+cat merge_embed.py.stdout</span></pre>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 5 — Tạo gói video stego</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> tạo thư mục bằng chứng gồm video H.265 và trace stego đi kèm.</p>
+        <p>Tool <code>build_stego_container.py</code> sao chép video nguồn, gắn trace stego vào gói bằng chứng và in thông tin codec.</p>
+        <pre><span class="cmd">python3 tools/build_stego_container.py evidence/warehouse-source.mp4 work/merge_stego.csv stego &gt; build_stego_container.py.stdout
+cat build_stego_container.py.stdout
+ls -lh stego</span></pre>
+        <div class="box box-info">
+          Dòng cần chú ý là <code>TECHNIQUE=CABAC_MERGE_IDX_PARITY</code>. Đây là nhãn kỹ thuật dùng cho kết luận điều tra.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 6 — Sửa extractor để khôi phục tin</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> đọc lại parity của <code>merge_idx</code>, ghép bit thành byte và khôi phục thông điệp ASCII.</p>
+        <p>Script cần sửa là <code>tools/merge_extract.py</code>.</p>
+        <pre><span class="cmd">nano tools/merge_extract.py</span></pre>
+        <div class="box box-info">
+          Dòng quan trọng là lấy bit từ <code>merge_idx</code>. Nếu lấy sai parity, thông điệp sẽ ra ký tự rác.
+        </div>
+        <p>Chạy extractor:</p>
+        <pre><span class="cmd">python3 tools/merge_extract.py stego/warehouse-merge-stego.merge.csv &gt; merge_extract.py.stdout
+cat merge_extract.py.stdout</span></pre>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 7 — Đối chiếu ghi chú sự cố</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> xác định tài khoản đã export video trong kịch bản điều tra.</p>
+        <p>Đọc <code>evidence/incident_note.txt</code> và dùng <code>grep</code> tìm user liên quan.</p>
+        <pre><span class="cmd">cat evidence/incident_note.txt
+grep cam-admin evidence/incident_note.txt &gt; grep.stdout
+cat grep.stdout</span></pre>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 8 — Viết kết luận</div>
+      <div class="task-body">
+        <p><strong>Mục đích:</strong> tổng hợp người liên quan, thông điệp khôi phục và kỹ thuật được dùng.</p>
+        <p>Tạo file <code>answer.txt</code>, trên một dòng có đủ ba thông tin:</p>
+        <pre><span class="cmd">cam-admin
+HEVC{cabac_merge_idx_channel}
+CABAC_MERGE_IDX</span></pre>
+        <p>Kiểm tra kết quả:</p>
+        <pre><span class="cmd">checkwork h265-cabac-merge-stego</span></pre>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Học viện Công nghệ Bưu chính Viễn thông — SecLab PTIT</p>
+      <p style="margin-top:4px">Bài thực hành mô phỏng kỹ thuật giấu tin trong syntax element của H.265 phục vụ mục đích đào tạo an toàn thông tin.</p>
+    </div>
+  </div>
+</body>
+
+</html>

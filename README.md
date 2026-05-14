@@ -57,3 +57,15 @@ checkwork h265-filler-nal-stego
 ```
 
 Các lab không yêu cầu nhập checkword thủ công; Labtainer tự chấm qua `checkwork`.
+
+## Lab 4: h265-cabac-merge-stego
+
+Thực hành giấu tin trong H.265 bằng parity của `merge_idx` trong CABAC/merge-mode trace.
+
+Hướng dẫn HTML: [HUONG_DAN_H265_CABAC_MERGE_STEGO.html](HUONG_DAN_H265_CABAC_MERGE_STEGO.html)
+
+```bash
+cd ~/labtainer/labtainer-student
+imodule https://github.com/NKTriS/h265-stego-labtainer/raw/refs/heads/main/h265-cabac-merge-stego.tar.gz
+labtainer h265-cabac-merge-stego
+```
