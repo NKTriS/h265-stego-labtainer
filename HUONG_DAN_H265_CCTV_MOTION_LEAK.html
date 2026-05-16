@@ -510,13 +510,13 @@
     <div class="task-block">
       <div class="task-header">Nhiệm vụ 7 — Đối chiếu log máy chủ</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> xác định user đã upload/export video nghi vấn.</p>
+        <p><strong>Mục đích:</strong> xác định user đã export video nghi vấn trước khi file bị đưa ra ngoài.</p>
         <p>File <code>cctv_export.log</code> là log từ máy chủ chứng cứ. File <code>grep.stdout</code> lưu dòng log quan trọng để phục vụ kết luận điều tra.</p>
         <p>Tải hoặc đọc log từ evidence-server:</p>
         <pre><span class="cmd">curl http://evidence-server:8080/logs/cctv_export.log -o cctv_export.log</span>
-<span class="cmd">grep uploaded cctv_export.log &gt; grep.stdout</span>
+<span class="cmd">grep exported cctv_export.log &gt; grep.stdout</span>
 <span class="cmd">cat grep.stdout</span></pre>
-        <p>Dòng log cần tìm có user <code>intern01</code>. Đây là tài khoản đáng ngờ trong kịch bản.</p>
+        <p>Dòng <code>exported</code> mới có user <code>intern01</code>. Dòng <code>uploaded</code> chỉ cho biết file đi tới endpoint bên ngoài, không có tên tài khoản.</p>
         <div class="box box-success">
           <strong>Điều kiện hoàn thành:</strong> File <code>grep.stdout</code> có <code>intern01</code>.
         </div>
