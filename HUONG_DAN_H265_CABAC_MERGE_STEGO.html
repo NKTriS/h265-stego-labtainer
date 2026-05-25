@@ -231,46 +231,45 @@ merge_idx lẻ   -&gt; bit 1</span></pre>
     <h2>5. Các nhiệm vụ thực hành</h2>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 1 — Xác nhận video H.265</div>
+      <div class="task-header">Nhi?m v? 1 - X?c nh?n video g?c l? video th??ng</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> kiểm tra video nguồn là MP4 chứa stream H.265 thật.</p>
-        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 evidence/warehouse-source.mp4 &gt; ffprobe.stdout
-cat ffprobe.stdout</span></pre>
-        <div class="box box-info">
-          Dòng cần chú ý là <code>codec_name=hevc</code>. File <code>ffprobe.stdout</code> là bằng chứng cho Task 1.
-        </div>
+        <p><strong>M?c ??ch:</strong> ki?m tra file ??u v?o l? video MP4 th?ng th??ng d?ng H.264 ?? sinh vi?n t? n?n sang H.265.</p>
+        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 evidence/warehouse-raw.mp4 &gt; ffprobe_raw.stdout
+cat ffprobe_raw.stdout</span></pre>
+        <div class="box box-info">D?ng c?n ch? ? l? <code>codec_name=h264</code>. Clip g?c l? Big Buck Bunny 30 gi?y, H.264 MP4, ???c chu?n b? ? 1280x720 ?? h?nh r? h?n.</div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 2 — Xuất một frame để quan sát</div>
+      <div class="task-header">Nhi?m v? 2 - N?n video sang chu?n H.265</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> chứng minh video có thể giải mã và có hình ảnh xem được.</p>
+        <p><strong>M?c ??ch:</strong> d?ng <code>ffmpeg</code> ?? re-encode video th??ng th?nh H.265/HEVC.</p>
         <pre><span class="cmd">mkdir -p work
-ffmpeg -y -i evidence/warehouse-source.mp4 -frames:v 1 work/source_frame.png &gt; frame_export.stdout 2&gt;&amp;1
+ffmpeg -y -i evidence/warehouse-raw.mp4 -c:v libx265 -preset fast -x265-params crf=28 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1
+ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 work/warehouse-h265.mp4 &gt;&gt; compress.stdout
+echo COMPRESSED_HEVC=work/warehouse-h265.mp4 &gt;&gt; compress.stdout
+cat compress.stdout
+ls -lh work/warehouse-h265.mp4</span></pre>
+        <div class="box box-info">D?ng c?n ch? ? l? <code>codec_name=hevc</code> v? <code>COMPRESSED_HEVC=work/warehouse-h265.mp4</code>.</div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhi?m v? 3 - Xu?t m?t frame t? video H.265 ?? quan s?t</div>
+      <div class="task-body">
+        <p><strong>M?c ??ch:</strong> ch?ng minh video sau khi n?n sang H.265 v?n gi?i m? v? xem ???c.</p>
+        <pre><span class="cmd">ffmpeg -y -i work/warehouse-h265.mp4 -frames:v 1 work/source_frame.png &gt; frame_export.stdout 2&gt;&amp;1
 cat frame_export.stdout
 ls -lh work/source_frame.png</span></pre>
-        <p>Có thể xem video trực tiếp nếu X11 hoạt động:</p>
-        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-source.mp4</span></pre>
-        <p>Hoặc chạy alias:</p>
-        <pre><span class="cmd">play-source</span></pre>
+        <p>C? th? xem video H.265 tr?c ti?p n?u X11 ho?t ??ng:</p>
+        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 work/warehouse-h265.mp4</span></pre>
+        <p>Ho?c ch?y alias:</p>
+        <pre><span class="cmd">play-h265</span></pre>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 3 — Quan sát trace merge_idx</div>
-      <div class="task-body">
-        <p><strong>Mục đích:</strong> xem các record merge mode dùng làm carrier.</p>
-        <pre><span class="cmd">python3 tools/merge_trace_dump.py evidence/merge_trace.csv &gt; merge_trace_dump.py.stdout
-cat merge_trace_dump.py.stdout</span></pre>
-        <div class="box box-info">
-          Output cần chú ý là <code>USABLE_MERGE_RECORDS=320</code>. Cột quan trọng nhất là <code>merge_idx</code>.
-        </div>
-      </div>
-    </div>
-
-    <div class="task-block">
-      <div class="task-header">Nhiệm vụ 4 — Sửa embedder để giấu tin</div>
+      <div class="task-header">Nhi?m v? 6 - T?o g?i video stego</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> đọc thông điệp, chuyển thành bit và ghi từng bit vào parity của <code>merge_idx</code>.</p>
         <pre><span class="cmd">cat evidence/message.txt
@@ -289,10 +288,10 @@ cat merge_embed.py.stdout</span></pre>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 5 — Tạo gói video stego</div>
+      <div class="task-header">Nhi?m v? 7 - S?a extractor ?? kh?i ph?c tin</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> tạo thư mục <code>stego/</code> gồm video và trace stego đi kèm.</p>
-        <pre><span class="cmd">python3 tools/build_stego_container.py evidence/warehouse-source.mp4 work/merge_stego.csv stego &gt; build_stego_container.py.stdout
+        <pre><span class="cmd">python3 tools/build_stego_container.py work/warehouse-h265.mp4 work/merge_stego.csv stego &gt; build_stego_container.py.stdout
 cat build_stego_container.py.stdout
 ls -lh stego</span></pre>
         <div class="box box-info">
@@ -303,7 +302,7 @@ ls -lh stego</span></pre>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 6 — Sửa extractor để khôi phục tin</div>
+      <div class="task-header">Nhi?m v? 8 - ??i chi?u ghi ch? s? c?</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> đọc lại parity của <code>merge_idx</code>, ghép bit thành byte và khôi phục thông điệp ASCII.</p>
         <pre><span class="cmd">nano tools/merge_extract.py</span></pre>
@@ -320,7 +319,7 @@ cat merge_extract.py.stdout</span></pre>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhiệm vụ 7 — Đối chiếu ghi chú sự cố</div>
+      <div class="task-header">Nhi?m v? 9 - Vi?t k?t lu?n</div>
       <div class="task-body">
         <p><strong>Mục đích:</strong> xác định tài khoản đã export video trong kịch bản điều tra.</p>
         <pre><span class="cmd">cat evidence/incident_note.txt
@@ -345,7 +344,7 @@ cat grep.stdout</span></pre>
     <p>Từ terminal <code>student</code>, chạy:</p>
     <pre><span class="cmd">checkwork h265-cabac-merge-stego</span></pre>
     <p>
-      Nếu một task chưa lên <code>Y</code>, quay lại đúng file output của task đó để kiểm tra. Ví dụ Task 6 chấm
+      Nếu một task chưa lên <code>Y</code>, quay lại đúng file output của task đó để kiểm tra. Ví dụ Task 7 chấm
       <code>merge_extract.py.stdout</code>, nên file này cần có dòng <code>MERGE_MESSAGE=HEVC{cabac_merge_idx_channel}</code>.
     </p>
 
