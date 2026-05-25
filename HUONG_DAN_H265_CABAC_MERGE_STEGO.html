@@ -228,87 +228,187 @@ merge_idx lẻ   -&gt; bit 1</span></pre>
       nằm dưới dạng văn bản trong file mà nằm trong quyết định mã hóa của codec.
     </p>
 
-    <h2>5. Các nhiệm vụ thực hành</h2>
+    <h2>5. Quy trình thực hành</h2>
+
+    <div class="box box-info">
+      <strong>Ghi chú:</strong><br />
+      Các file có đuôi <code>.stdout</code> trong bài dùng để lưu lại bằng chứng lệnh đã chạy và kết quả quan trọng.
+      Khi làm lab, sinh viên nên đọc lại các file này bằng <code>cat</code> để biết mình đang có dữ liệu gì trước khi sang bước tiếp theo.
+    </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 1 - X?c nh?n video g?c l? video th??ng</div>
+      <div class="task-header">Nhiệm vụ 1 — Kiểm tra video nguồn</div>
       <div class="task-body">
-        <p><strong>M?c ??ch:</strong> ki?m tra file ??u v?o l? video MP4 th?ng th??ng d?ng H.264 ?? sinh vi?n t? n?n sang H.265.</p>
-        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 evidence/warehouse-raw.mp4 &gt; ffprobe_raw.stdout
+        <p>
+          Bài lab bắt đầu từ một video MP4 bình thường, chưa phải H.265. File nguồn là
+          <code>evidence/warehouse-raw.mp4</code>, được dùng làm đầu vào để sinh viên tự nén sang chuẩn H.265 ở bước sau.
+        </p>
+        <pre><span class="cmd">file evidence/warehouse-raw.mp4
+ls -lh evidence/warehouse-raw.mp4
+ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 evidence/warehouse-raw.mp4 &gt; ffprobe_raw.stdout
 cat ffprobe_raw.stdout</span></pre>
-        <div class="box box-info">D?ng c?n ch? ? l? <code>codec_name=h264</code>. Clip g?c l? Big Buck Bunny 30 gi?y, H.264 MP4, ???c chu?n b? ? 1280x720 ?? h?nh r? h?n.</div>
+        <div class="box box-info">
+          Cần chú ý dòng <code>codec_name=h264</code>. Điều này cho thấy video nguồn đang là H.264 MP4, chưa phải video
+          H.265. Các dòng <code>width</code>, <code>height</code>, <code>duration</code> giúp xác nhận độ phân giải và thời lượng clip.
+        </div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 2 - N?n video sang chu?n H.265</div>
+      <div class="task-header">Nhiệm vụ 2 — Xem thử video nguồn</div>
       <div class="task-body">
-        <p><strong>M?c ??ch:</strong> d?ng <code>ffmpeg</code> ?? re-encode video th??ng th?nh H.265/HEVC.</p>
+        <p>
+          Trước khi nén, sinh viên nên xem nhanh video gốc để biết nội dung hình ảnh ban đầu. Nếu môi trường X11 hoạt động,
+          có thể mở trực tiếp bằng <code>ffplay</code>.
+        </p>
+        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 evidence/warehouse-raw.mp4</span></pre>
+        <p>Hoặc dùng alias đã chuẩn bị sẵn trong container:</p>
+        <pre><span class="cmd">play-source</span></pre>
+        <p>Nếu không mở được cửa sổ video, xuất một frame đầu tiên ra ảnh để quan sát:</p>
+        <pre><span class="cmd">mkdir -p work
+ffmpeg -y -i evidence/warehouse-raw.mp4 -frames:v 1 work/raw_frame.png &gt; raw_frame.stdout 2&gt;&amp;1
+ls -lh work/raw_frame.png</span></pre>
+        <div class="box box-warning">
+          Nếu <code>ffplay</code> báo lỗi <code>No available video device</code>, nguyên nhân thường là X11 chưa hoạt động trong môi trường Docker.
+          Khi đó vẫn có thể tiếp tục lab bình thường bằng cách xuất frame với <code>ffmpeg</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 3 — Nén video nguồn sang H.265</div>
+      <div class="task-body">
+        <p>
+          Ở bước này, sinh viên dùng <code>ffmpeg</code> để re-encode video H.264 sang H.265/HEVC. File sau nén được đặt tại
+          <code>work/warehouse-h265.mp4</code>.
+        </p>
         <pre><span class="cmd">mkdir -p work
 ffmpeg -y -i evidence/warehouse-raw.mp4 -c:v libx265 -preset fast -x265-params crf=28 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1
-ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=noprint_wrappers=1 work/warehouse-h265.mp4 &gt;&gt; compress.stdout
+ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 work/warehouse-h265.mp4 &gt;&gt; compress.stdout
 echo COMPRESSED_HEVC=work/warehouse-h265.mp4 &gt;&gt; compress.stdout
-cat compress.stdout
-ls -lh work/warehouse-h265.mp4</span></pre>
-        <div class="box box-info">D?ng c?n ch? ? l? <code>codec_name=hevc</code> v? <code>COMPRESSED_HEVC=work/warehouse-h265.mp4</code>.</div>
+cat compress.stdout</span></pre>
+        <div class="box box-info">
+          Tham số dễ nhầm là <code>-c:v libx265</code>, đây là phần chọn bộ mã hóa H.265. Tham số <code>crf=28</code>
+          điều khiển chất lượng/nén: số càng thấp thì chất lượng thường cao hơn nhưng file lớn hơn. Tham số <code>-an</code>
+          bỏ audio để bài tập trung vào video.
+        </div>
+        <div class="box box-success">
+          Sau khi nén, trong <code>compress.stdout</code> cần thấy <code>codec_name=hevc</code> và
+          <code>COMPRESSED_HEVC=work/warehouse-h265.mp4</code>.
+        </div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 3 - Xu?t m?t frame t? video H.265 ?? quan s?t</div>
+      <div class="task-header">Nhiệm vụ 4 — So sánh dung lượng trước và sau khi nén</div>
       <div class="task-body">
-        <p><strong>M?c ??ch:</strong> ch?ng minh video sau khi n?n sang H.265 v?n gi?i m? v? xem ???c.</p>
+        <p>
+          So sánh kích thước giúp sinh viên thấy tác dụng của nén video. H.265 thường cho file nhỏ hơn H.264 ở cùng mức
+          chất lượng cảm nhận, nhưng kết quả thực tế còn phụ thuộc nội dung video và tham số nén.
+        </p>
+        <pre><span class="cmd">ls -lh evidence/warehouse-raw.mp4 work/warehouse-h265.mp4
+du -h evidence/warehouse-raw.mp4 work/warehouse-h265.mp4 &gt; size_compare.stdout
+cat size_compare.stdout</span></pre>
+        <div class="box box-info">
+          File <code>size_compare.stdout</code> lưu bằng chứng so sánh dung lượng. Nếu muốn tăng chất lượng video H.265,
+          có thể thử lại với <code>crf=24</code> hoặc <code>crf=22</code>; đổi lại file sẽ lớn hơn và thời gian nén lâu hơn.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 5 — Xem video H.265 sau khi nén</div>
+      <div class="task-body">
+        <p>
+          Sau khi nén xong, cần kiểm tra video H.265 vẫn mở được và hình ảnh không bị lỗi rõ ràng. Có thể xem trực tiếp:
+        </p>
+        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 work/warehouse-h265.mp4</span></pre>
+        <p>Hoặc dùng alias:</p>
+        <pre><span class="cmd">play-h265</span></pre>
+        <p>Nếu không xem trực tiếp được, xuất frame từ video H.265:</p>
         <pre><span class="cmd">ffmpeg -y -i work/warehouse-h265.mp4 -frames:v 1 work/source_frame.png &gt; frame_export.stdout 2&gt;&amp;1
 cat frame_export.stdout
 ls -lh work/source_frame.png</span></pre>
-        <p>C? th? xem video H.265 tr?c ti?p n?u X11 ho?t ??ng:</p>
-        <pre><span class="cmd">ffplay -loglevel error -x 640 -y 360 work/warehouse-h265.mp4</span></pre>
-        <p>Ho?c ch?y alias:</p>
-        <pre><span class="cmd">play-h265</span></pre>
+        <div class="box box-info">
+          Dòng <code>frame=</code> trong <code>frame_export.stdout</code> cho biết <code>ffmpeg</code> đã decode và xuất frame thành công.
+          Ảnh <code>work/source_frame.png</code> là bằng chứng nhanh rằng video H.265 vẫn đọc được.
+        </div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 6 - T?o g?i video stego</div>
+      <div class="task-header">Nhiệm vụ 6 — Quan sát trace merge_idx</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> đọc thông điệp, chuyển thành bit và ghi từng bit vào parity của <code>merge_idx</code>.</p>
+        <p>
+          Lab cung cấp file <code>evidence/merge_trace.csv</code> như trace cú pháp đã trích xuất từ quá trình phân tích H.265.
+          Mỗi record tương ứng một vị trí có thể dùng làm carrier nếu block dùng merge mode và có đủ candidate.
+        </p>
+        <pre><span class="cmd">python3 tools/merge_trace_dump.py evidence/merge_trace.csv &gt; merge_trace_dump.py.stdout
+cat merge_trace_dump.py.stdout</span></pre>
+        <div class="box box-info">
+          Các cột quan trọng là <code>merge_flag</code>, <code>candidate_count</code> và <code>merge_idx</code>.
+          Dòng <code>USABLE_MERGE_RECORDS=320</code> cho biết có 320 record đủ điều kiện để làm nơi giấu bit.
+        </div>
+      </div>
+    </div>
+
+    <div class="task-block">
+      <div class="task-header">Nhiệm vụ 7 — Sửa embedder để giấu thông điệp</div>
+      <div class="task-body">
+        <p>
+          File <code>evidence/message.txt</code> chứa thông điệp cần giấu. Sinh viên chỉ cần sửa các dòng TODO trong
+          <code>tools/merge_embed.py</code>, không phải viết lại toàn bộ chương trình.
+        </p>
         <pre><span class="cmd">cat evidence/message.txt
 nano tools/merge_embed.py</span></pre>
         <div class="box box-info">
-          Trong <code>tools/merge_embed.py</code> có 2 TODO. Ở Task 4.1, bit 0 dùng <code>merge_idx</code> chẵn và bit 1 dùng
-          <code>merge_idx</code> lẻ. Trong lab này có thể dùng <code>merge_idx = 0</code> cho bit 0 và <code>merge_idx = 1</code>
-          cho bit 1. Ở Task 4.2, dùng <code>text_to_bits(message)</code> để chuyển message thành danh sách bit.
+          Trong hàm <code>embed_bits</code>, dùng <code>merge_idx</code> chẵn cho bit 0 và <code>merge_idx</code> lẻ cho bit 1.
+          Với dữ liệu lab này, có thể đặt trực tiếp <code>row["merge_idx"] = bit</code>. Ở phần đọc message, chuyển chuỗi
+          sang bit bằng <code>bits = text_to_bits(message)</code>.
         </div>
         <pre><span class="cmd">python3 tools/merge_embed.py evidence/merge_trace.csv evidence/message.txt work/merge_stego.csv &gt; merge_embed.py.stdout
-cat merge_embed.py.stdout</span></pre>
+cat merge_embed.py.stdout
+head work/merge_stego.csv</span></pre>
         <div class="box box-success">
-          Output đúng cần có <code>MESSAGE_BITS=232</code> và <code>MERGE_STEGO_TRACE=work/merge_stego.csv</code>.
+          Output đúng cần có <code>MESSAGE_BITS=232</code>. File <code>work/merge_stego.csv</code> là trace sau khi đã sửa
+          parity của <code>merge_idx</code> để mang thông điệp.
         </div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 7 - S?a extractor ?? kh?i ph?c tin</div>
+      <div class="task-header">Nhiệm vụ 8 — Tạo gói video stego và so sánh sau khi giấu</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> tạo thư mục <code>stego/</code> gồm video và trace stego đi kèm.</p>
+        <p>
+          Bước này gom video H.265 và trace stego vào thư mục <code>stego/</code>. Trong mô phỏng của lab, video chính vẫn là
+          video H.265 hợp lệ; phần dấu vết giấu tin nằm ở trace <code>merge_idx</code> đi kèm.
+        </p>
         <pre><span class="cmd">python3 tools/build_stego_container.py work/warehouse-h265.mp4 work/merge_stego.csv stego &gt; build_stego_container.py.stdout
 cat build_stego_container.py.stdout
+ls -lh work/warehouse-h265.mp4 stego/warehouse-merge-stego.mp4
 ls -lh stego</span></pre>
+        <p>Có thể kiểm tra hash để thấy hai file video/package được tạo ra là các đối tượng khác nhau:</p>
+        <pre><span class="cmd">sha256sum work/warehouse-h265.mp4 stego/warehouse-merge-stego.mp4 &gt; stego_hash.stdout
+cat stego_hash.stdout</span></pre>
         <div class="box box-info">
-          Dòng cần chú ý là <code>TECHNIQUE=CABAC_MERGE_IDX_PARITY</code>. File quan trọng cho Task 6 là
-          <code>stego/warehouse-merge-stego.merge.csv</code>.
+          Dòng cần chú ý trong output là <code>TECHNIQUE=CABAC_MERGE_IDX_PARITY</code>. Về bản chất kỹ thuật, giấu bằng
+          parity của syntax element không phải kiểu nối thêm payload lớn vào cuối file, nên dung lượng thường không thay đổi
+          mạnh như các kỹ thuật nhúng dữ liệu thô.
         </div>
       </div>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 8 - ??i chi?u ghi ch? s? c?</div>
+      <div class="task-header">Nhiệm vụ 9 — Sửa extractor để khôi phục thông điệp</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> đọc lại parity của <code>merge_idx</code>, ghép bit thành byte và khôi phục thông điệp ASCII.</p>
+        <p>
+          Sau khi có trace stego, sinh viên sửa extractor để đọc lại bit từ parity của <code>merge_idx</code>. Đây là bước
+          kiểm chứng rằng cách nhúng ở nhiệm vụ 7 là đúng.
+        </p>
         <pre><span class="cmd">nano tools/merge_extract.py</span></pre>
         <div class="box box-info">
-          Trong TODO Task 6.1, bit cần khôi phục là phần dư khi <code>merge_idx</code> chia cho 2. Nếu lấy sai parity,
-          thông điệp sẽ ra ký tự rác.
+          Trong TODO của <code>recover_bits</code>, bit cần khôi phục là phần dư khi <code>merge_idx</code> chia cho 2:
+          <code>bit = int(row["merge_idx"]) % 2</code>. Nếu lấy sai bit, thông điệp sau khi ghép byte sẽ thành ký tự rác.
         </div>
         <pre><span class="cmd">python3 tools/merge_extract.py stego/warehouse-merge-stego.merge.csv &gt; merge_extract.py.stdout
 cat merge_extract.py.stdout</span></pre>
@@ -319,34 +419,25 @@ cat merge_extract.py.stdout</span></pre>
     </div>
 
     <div class="task-block">
-      <div class="task-header">Nhi?m v? 9 - Vi?t k?t lu?n</div>
+      <div class="task-header">Nhiệm vụ 10 — Đối chiếu ghi chú sự cố và viết kết luận</div>
       <div class="task-body">
-        <p><strong>Mục đích:</strong> xác định tài khoản đã export video trong kịch bản điều tra.</p>
+        <p>
+          Cuối cùng, đọc ghi chú sự cố để xác định tài khoản đã export video, sau đó tổng hợp lại người liên quan,
+          thông điệp khôi phục và kỹ thuật giấu tin.
+        </p>
         <pre><span class="cmd">cat evidence/incident_note.txt
 grep cam-admin evidence/incident_note.txt &gt; grep.stdout
 cat grep.stdout</span></pre>
-        <p>File <code>grep.stdout</code> cần có <code>cam-admin</code>.</p>
-      </div>
-    </div>
-
-    <div class="task-block">
-      <div class="task-header">Nhiệm vụ 8 — Viết kết luận</div>
-      <div class="task-body">
-        <p><strong>Mục đích:</strong> tổng hợp người liên quan, thông điệp khôi phục và kỹ thuật được dùng.</p>
-        <p>Tạo file <code>answer.txt</code>:</p>
+        <p>Tạo file kết luận:</p>
         <pre><span class="cmd">nano answer.txt</span></pre>
         <p>Trong một dòng, ghi đủ 3 thông tin:</p>
         <pre><span class="cmd">cam-admin HEVC{cabac_merge_idx_channel} CABAC_MERGE_IDX</span></pre>
+        <div class="box box-info">
+          <code>cam-admin</code> là tài khoản liên quan trong ghi chú sự cố, <code>HEVC{cabac_merge_idx_channel}</code>
+          là thông điệp khôi phục, còn <code>CABAC_MERGE_IDX</code> là kỹ thuật giấu tin được sử dụng.
+        </div>
       </div>
     </div>
-
-    <h2>6. Kiểm tra</h2>
-    <p>Từ terminal <code>student</code>, chạy:</p>
-    <pre><span class="cmd">checkwork h265-cabac-merge-stego</span></pre>
-    <p>
-      Nếu một task chưa lên <code>Y</code>, quay lại đúng file output của task đó để kiểm tra. Ví dụ Task 7 chấm
-      <code>merge_extract.py.stdout</code>, nên file này cần có dòng <code>MERGE_MESSAGE=HEVC{cabac_merge_idx_channel}</code>.
-    </p>
 
     <div class="footer">
       <p>Học viện Công nghệ Bưu chính Viễn thông — SecLab PTIT</p>
