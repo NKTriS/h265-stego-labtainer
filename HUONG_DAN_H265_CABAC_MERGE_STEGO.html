@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -240,16 +240,16 @@ merge_idx lẻ   -&gt; bit 1</span></pre>
       <div class="task-header">Nhiệm vụ 1 — Kiểm tra và xem video nguồn</div>
       <div class="task-body">
         <p>
-          File đầu vào là <code>evidence/warehouse-raw.mp4</code>. Đây là video MP4 thông thường dùng làm nguyên liệu
+          File đầu vào là <code>evidence/warehouse-source.mp4</code>. Đây là video MP4 thông thường dùng làm nguyên liệu
           để nén sang H.265, chưa phải file chứa tin giấu.
         </p>
 
         <p>Trước tiên, kiểm tra nhanh loại file và dung lượng:</p>
-        <pre><span class="cmd">file evidence/warehouse-raw.mp4
-ls -lh evidence/warehouse-raw.mp4</span></pre>
+        <pre><span class="cmd">file evidence/warehouse-source.mp4
+ls -lh evidence/warehouse-source.mp4</span></pre>
 
         <p>Sau đó dùng <code>ffprobe</code> để xem codec, độ phân giải, tốc độ khung hình và thời lượng:</p>
-        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 evidence/warehouse-raw.mp4 &gt; ffprobe_raw.stdout
+        <pre><span class="cmd">ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate,duration -of default=noprint_wrappers=1 evidence/warehouse-source.mp4 &gt; ffprobe_raw.stdout
 cat ffprobe_raw.stdout</span></pre>
 
         <div class="box box-info">
@@ -262,7 +262,7 @@ cat ffprobe_raw.stdout</span></pre>
 
         <p>Nếu không mở được cửa sổ video, xuất một frame để quan sát thay thế:</p>
         <pre><span class="cmd">mkdir -p work
-ffmpeg -y -i evidence/warehouse-raw.mp4 -frames:v 1 work/raw_frame.png &gt; raw_frame.stdout 2&gt;&amp;1
+ffmpeg -y -i evidence/warehouse-source.mp4 -frames:v 1 work/raw_frame.png &gt; raw_frame.stdout 2&gt;&amp;1
 ls -lh work/raw_frame.png</span></pre>
 
         <div class="box box-warning">
@@ -282,7 +282,7 @@ ls -lh work/raw_frame.png</span></pre>
 
         <p>Tạo thư mục làm việc rồi chạy <code>ffmpeg</code>:</p>
         <pre><span class="cmd">mkdir -p work
-ffmpeg -y -i evidence/warehouse-raw.mp4 -c:v libx265 -preset fast -x265-params crf=28 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1</span></pre>
+ffmpeg -y -i evidence/warehouse-source.mp4 -c:v libx265 -preset fast -x265-params crf=28 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1</span></pre>
 
         <div class="box box-info">
           Tham số quan trọng nhất là <code>-c:v libx265</code>, dùng để chọn encoder H.265. Tham số <code>crf=28</code>
@@ -300,8 +300,8 @@ cat compress.stdout</span></pre>
         </div>
 
         <p>So sánh dung lượng trước và sau khi nén:</p>
-        <pre><span class="cmd">ls -lh evidence/warehouse-raw.mp4 work/warehouse-h265.mp4
-du -h evidence/warehouse-raw.mp4 work/warehouse-h265.mp4 &gt; size_compare.stdout
+        <pre><span class="cmd">ls -lh evidence/warehouse-source.mp4 work/warehouse-h265.mp4
+du -h evidence/warehouse-source.mp4 work/warehouse-h265.mp4 &gt; size_compare.stdout
 cat size_compare.stdout</span></pre>
 
         <p>Nếu muốn xem lại video H.265 sau khi nén, chạy:</p>
