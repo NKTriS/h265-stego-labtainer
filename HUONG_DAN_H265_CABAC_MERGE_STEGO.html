@@ -282,10 +282,10 @@ ls -lh work/raw_frame.png</span></pre>
 
         <p>Tạo thư mục làm việc rồi chạy <code>ffmpeg</code>:</p>
         <pre><span class="cmd">mkdir -p work
-ffmpeg -y -i evidence/warehouse-source.mp4 -c:v libx265 -preset fast -x265-params crf=28 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1</span></pre>
+ffmpeg -y -i evidence/warehouse-source.mp4 -c:v libx265 -preset ultrafast -x265-params crf=26 -an work/warehouse-h265.mp4 &gt; compress.stdout 2&gt;&amp;1</span></pre>
 
         <div class="box box-info">
-          Tham số quan trọng nhất là <code>-c:v libx265</code>, dùng để chọn encoder H.265. Tham số <code>crf=28</code>
+          Tham số quan trọng nhất là <code>-c:v libx265</code>, dùng để chọn encoder H.265. Tham số <code>crf=26</code>
           điều khiển chất lượng/nén: CRF thấp hơn thì hình thường đẹp hơn nhưng file lớn hơn. Tham số <code>-an</code>
           bỏ audio để bài chỉ tập trung vào luồng video.
         </div>
